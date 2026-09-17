@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#0a2540" />
+      <stop offset="100%" stop-color="#041426" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="16" y1="20" x2="76" y2="68" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="52" y1="60" x2="112" y2="108" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FB923C" />
+      <stop offset="100%" stop-color="#EA580C" />
+    </linearGradient>
+    <filter id="glow" x="-10%" y="-10%" width="120%" height="120%" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Squircle App Icon Base -->
+  <rect x="4" y="4" width="120" height="120" rx="28" fill="url(#bgGrad)" stroke="#1e3a5f" stroke-width="2" />
+  
+  <!-- Subtle network grid circles -->
+  <circle cx="64" cy="64" r="46" stroke="#ffffff" stroke-opacity="0.06" stroke-dasharray="3 3" />
+  <circle cx="64" cy="64" r="32" stroke="#ffffff" stroke-opacity="0.08" />
+
+  <!-- Upper Emerald Loop Arrow (DNS / Dynamic Inbound) -->
+  <path
+    d="M26 60C26 38.5 41.5 24 64 24H86L72 40L86 56H64C51 56 42 63.5 42 74V78L26 60Z"
+    fill="url(#greenGrad)"
+    filter="url(#glow)"
+  />
+
+  <!-- Lower Vivid Orange Loop Arrow (Dynamic Outbound / IP Sync) -->
+  <path
+    d="M102 68C102 89.5 86.5 104 64 104H42L56 88L42 72H64C77 72 86 64.5 86 54V50L102 68Z"
+    fill="url(#orangeGrad)"
+    filter="url(#glow)"
+  />
+
+  <!-- Center Core Sync Dot -->
+  <circle cx="64" cy="64" r="5.5" fill="#ffffff" />
+  <circle cx="64" cy="64" r="9" stroke="#38bdf8" stroke-width="1.5" stroke-opacity="0.6" />
+</svg>

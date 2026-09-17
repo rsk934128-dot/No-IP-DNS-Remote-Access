@@ -1,0 +1,6 @@
+{
+  "name": "No-IP DNS & Remote Access",
+  "description": "Connect Your Home with Confidence. Smarter DNS, Dynamic DNS, Managed DNS, Domain Registration, and Port Forwarding tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
