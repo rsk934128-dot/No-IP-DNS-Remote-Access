@@ -19,7 +19,10 @@ import {
   CheckCircle2,
   Code2,
   Sun,
-  Moon
+  Moon,
+  Cloud,
+  Search,
+  ShieldAlert
 } from 'lucide-react';
 import { NoIpLogo } from './NoIpLogo';
 import { useTheme } from '../context/ThemeContext';
@@ -33,6 +36,9 @@ interface NavbarProps {
   onOpenCart: () => void;
   userEmail?: string;
   activeHostnamesCount?: number;
+  onOpenAuthModal?: () => void;
+  isAnonymous?: boolean;
+  onOpenDnsLookup: (initialDomain?: string) => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -43,6 +49,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenCart,
   userEmail = 'kh…@gmail.com',
   activeHostnamesCount = 2,
+  onOpenAuthModal,
+  isAnonymous = false,
+  onOpenDnsLookup,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -85,6 +94,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
               All Systems Operational
             </span>
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <button
+              id="topbar-dns-lookup-btn"
+              type="button"
+              onClick={() => onOpenDnsLookup()}
+              className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-[#ff6600] dark:hover:text-[#ff914d] transition-colors cursor-pointer font-medium"
+            >
+              <Search className="w-3.5 h-3.5 text-[#ff6600]" />
+              <span>DNS Lookup</span>
+              <span className="text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/30">Live</span>
+            </button>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <span className="text-slate-500 dark:text-slate-400">Need help? Call +1 775-853-1883</span>
           </div>
@@ -159,39 +179,68 @@ export const Navbar: React.FC<NavbarProps> = ({
 
             <span className="text-slate-300 dark:text-slate-700">|</span>
 
-            {/* Logged in User Pill */}
+            {/* Logged in User Pill / Cloud Sync */}
             <div className="relative" ref={userRef}>
               <button
                 id="user-account-menu-btn"
                 onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 hover:text-[#0a2540] dark:hover:text-white font-medium bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                className="flex items-center gap-1.5 text-slate-700 dark:text-slate-200 hover:text-[#0a2540] dark:hover:text-white font-medium bg-white dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-all cursor-pointer"
               >
-                <div className="w-4 h-4 rounded-full bg-slate-800 dark:bg-slate-700 text-white text-[9px] flex items-center justify-center font-bold">
-                  K
+                <div className={`w-4 h-4 rounded-full ${isAnonymous ? 'bg-amber-500' : 'bg-emerald-600'} text-white text-[9px] flex items-center justify-center font-bold`}>
+                  {isAnonymous ? 'G' : (userEmail?.[0]?.toUpperCase() || 'U')}
                 </div>
-                <span className="text-slate-500 dark:text-slate-400">Logged In as</span>
-                <span className="font-semibold text-slate-800 dark:text-slate-200">{userEmail}</span>
+                <span className="text-slate-500 dark:text-slate-400">
+                  {isAnonymous ? 'Guest' : 'Account'}:
+                </span>
+                <span className="font-semibold text-slate-800 dark:text-slate-200 max-w-[120px] truncate">
+                  {isAnonymous ? 'Unsaved (Cloud)' : userEmail}
+                </span>
                 <ChevronDown className="w-3 h-3 text-slate-400" />
               </button>
 
               {userMenuOpen && (
-                <div className="absolute right-0 mt-1.5 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-lg shadow-xl p-3 z-50 text-slate-700 dark:text-slate-200 animate-in fade-in duration-100">
-                  <div className="border-b border-slate-100 dark:border-slate-800 pb-2 mb-2">
-                    <p className="text-xs text-slate-500 dark:text-slate-400">No-IP Personal Account</p>
-                    <p className="text-sm font-bold text-[#0a2540] dark:text-white truncate">{userEmail}</p>
-                    <div className="mt-1 flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded w-fit border border-emerald-200/50 dark:border-emerald-800/40">
-                      <Activity className="w-3 h-3" /> {activeHostnamesCount} Active Hostnames
+                <div className="absolute right-0 mt-1.5 w-72 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-2xl p-3.5 z-50 text-slate-700 dark:text-slate-200 animate-in fade-in duration-100">
+                  <div className="border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-2.5">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                        {isAnonymous ? 'Guest Cloud Session' : 'Firebase Cloud Account'}
+                      </p>
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <Cloud className="w-2.5 h-2.5" /> Firestore
+                      </span>
+                    </div>
+                    <p className="text-sm font-bold text-[#0a2540] dark:text-white truncate mt-0.5">
+                      {userEmail || 'Anonymous Guest'}
+                    </p>
+                    <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded w-fit border border-emerald-200/50 dark:border-emerald-800/40">
+                      <Activity className="w-3 h-3" /> {activeHostnamesCount} Synced Hostnames
                     </div>
                   </div>
 
                   <div className="space-y-1 text-xs">
+                    {onOpenAuthModal && (
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          onOpenAuthModal();
+                        }}
+                        className="w-full text-left px-2.5 py-2 rounded-lg bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-[#ff6600] dark:text-[#ff914d] font-bold flex items-center justify-between transition-colors cursor-pointer"
+                      >
+                        <span className="flex items-center gap-1.5">
+                          <Cloud className="w-3.5 h-3.5" />
+                          {isAnonymous ? 'Create Free Account & Sync' : 'Account & Cloud Settings'}
+                        </span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);
                         const el = document.getElementById('active-hostnames-section');
                         el?.scrollIntoView({ behavior: 'smooth' });
                       }}
-                      className="w-full text-left px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition-colors cursor-pointer"
                     >
                       <span>Manage Dynamic DNS</span>
                       <span className="text-slate-400 text-[10px]">Dashboard</span>
@@ -202,9 +251,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setUserMenuOpen(false);
                         onOpenDucSimulator();
                       }}
-                      className="w-full text-left px-2.5 py-1.5 rounded hover:bg-orange-50 dark:hover:bg-slate-800 hover:text-[#ff6600] dark:hover:text-[#ff914d] flex items-center justify-between"
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition-colors cursor-pointer"
                     >
-                      <span className="font-medium">Dynamic Update Client (DUC)</span>
+                      <span>Dynamic Update Client (DUC)</span>
                       <span className="bg-orange-100 dark:bg-orange-950/80 text-[#ff6600] dark:text-[#ff914d] text-[9px] font-bold px-1.5 rounded">Simulate</span>
                     </button>
 
@@ -213,21 +262,40 @@ export const Navbar: React.FC<NavbarProps> = ({
                         setUserMenuOpen(false);
                         onOpenPortChecker();
                       }}
-                      className="w-full text-left px-2.5 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between"
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition-colors cursor-pointer"
                     >
                       <span>Port Forwarding Tool</span>
                       <ArrowUpRight className="w-3 h-3 text-slate-400" />
                     </button>
-                  </div>
 
-                  <div className="border-t border-slate-100 dark:border-slate-800 pt-2 mt-2">
-                    <button 
-                      onClick={() => setUserMenuOpen(false)}
-                      className="w-full text-left px-2.5 py-1.5 rounded hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-xs flex items-center gap-1.5"
+                    <button
+                      onClick={() => {
+                        setUserMenuOpen(false);
+                        onOpenDnsLookup();
+                      }}
+                      className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-between transition-colors cursor-pointer"
                     >
-                      <LogOut className="w-3 h-3" /> Log Out
+                      <span className="flex items-center gap-1.5">
+                        <Search className="w-3 h-3 text-[#ff6600]" />
+                        <span>Live DNS Record Lookup</span>
+                      </span>
+                      <span className="text-[9px] font-bold px-1 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Live</span>
                     </button>
                   </div>
+
+                  {onOpenAuthModal && (
+                    <div className="border-t border-slate-100 dark:border-slate-800 pt-2 mt-2">
+                      <button 
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          onOpenAuthModal();
+                        }}
+                        className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                      >
+                        <LogOut className="w-3 h-3" /> {isAnonymous ? 'Switch / Sign In to Account' : 'Sign Out / Switch Account'}
+                      </button>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -329,6 +397,20 @@ export const Navbar: React.FC<NavbarProps> = ({
                       <button
                         onClick={() => {
                           setSolutionsDropdownOpen(false);
+                          onOpenDnsLookup();
+                        }}
+                        className="w-full text-left p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 block transition-colors group cursor-pointer"
+                      >
+                        <div className="font-semibold text-slate-900 dark:text-white group-hover:text-[#ff6600] dark:group-hover:text-[#ff914d] text-sm flex items-center gap-1.5">
+                          <Search className="w-4 h-4 text-[#ff6600]" /> Real Public DNS Lookup
+                          <span className="text-[10px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.2 rounded font-bold">Live</span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Live Anycast DNS query via Google (8.8.8.8) or Cloudflare (1.1.1.1).</p>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setSolutionsDropdownOpen(false);
                           onOpenDucSimulator();
                         }}
                         className="w-full text-left p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 block transition-colors group cursor-pointer"
@@ -352,6 +434,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                           <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" /> Domain Registration & SSL
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Search custom .com, .net, .org with privacy included.</p>
+                      </a>
+
+                      <a
+                        href="#dns-security-best-practices"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setSolutionsDropdownOpen(false);
+                          document.getElementById('dns-security-best-practices')?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 block transition-colors group"
+                      >
+                        <div className="font-semibold text-slate-900 dark:text-white group-hover:text-[#ff6600] dark:group-hover:text-[#ff914d] text-sm flex items-center gap-1.5">
+                          <ShieldAlert className="w-4 h-4 text-rose-500" /> DNS Security & Anti-Poisoning
+                          <span className="text-[10px] bg-rose-500/15 text-rose-600 dark:text-rose-400 px-1.5 py-0.2 rounded font-bold">New</span>
+                        </div>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Secure home networks against DNS cache poisoning & spoofing.</p>
                       </a>
 
                       <a
@@ -536,8 +634,26 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/80 rounded-lg text-xs border border-slate-200/80 dark:border-slate-700">
-            <span className="text-slate-500 dark:text-slate-400">Account:</span>
-            <span className="font-semibold text-slate-800 dark:text-slate-200 truncate">{userEmail}</span>
+            <div>
+              <span className="text-slate-500 dark:text-slate-400 block text-[10px] uppercase font-bold">
+                {isAnonymous ? 'Guest Session' : 'Cloud Account'}
+              </span>
+              <span className="font-semibold text-slate-800 dark:text-slate-200 truncate block max-w-[160px]">
+                {userEmail || 'Guest'}
+              </span>
+            </div>
+            {onOpenAuthModal && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenAuthModal();
+                }}
+                className="px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded text-xs font-bold shadow-xs cursor-pointer"
+              >
+                {isAnonymous ? 'Sign In / Sync' : 'Account'}
+              </button>
+            )}
           </div>
 
           <div className="space-y-1 text-sm font-medium text-slate-800 dark:text-slate-200">
@@ -570,6 +686,30 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <span>Check My Port Forwarding</span>
               <Activity className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenDnsLookup();
+              }}
+              className="w-full text-left py-2 px-3 rounded hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between text-slate-800 dark:text-slate-200"
+            >
+              <span className="flex items-center gap-2">
+                <Search className="w-4 h-4 text-[#ff6600]" /> Live Public DNS Lookup
+              </span>
+              <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded font-bold">Live</span>
+            </button>
+            <button
+              onClick={() => {
+                setMobileMenuOpen(false);
+                document.getElementById('dns-security-best-practices')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="w-full text-left py-2 px-3 rounded hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between text-slate-800 dark:text-slate-200"
+            >
+              <span className="flex items-center gap-2">
+                <ShieldAlert className="w-4 h-4 text-rose-500" /> DNS Security Best Practices
+              </span>
+              <span className="text-[10px] bg-rose-500/10 text-rose-600 dark:text-rose-400 px-1.5 py-0.5 rounded font-bold">New</span>
             </button>
             <button
               onClick={() => {

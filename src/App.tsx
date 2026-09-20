@@ -21,38 +21,29 @@ import { PortCheckerModal } from './components/PortCheckerModal';
 import { DucSimulatorModal } from './components/DucSimulatorModal';
 import { CartModal } from './components/CartModal';
 import { DomainSearchModal } from './components/DomainSearchModal';
+import { AuthModal } from './components/AuthModal';
+import { DnsLookupModal } from './components/DnsLookupModal';
 import { HostnameRecord, CustomerAudience } from './types';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { useHostnames } from './hooks/useHostnames';
 
-export default function App() {
+function NoIpApp() {
+  const { user } = useAuth();
+
   // Current user's detected public IP
   const [currentIp, setCurrentIp] = useState('198.51.100.42');
-  const userEmail = 'kh…@gmail.com';
 
-  // Active hostnames in user account
-  const [hostnames, setHostnames] = useState<HostnameRecord[]>([
-    {
-      id: 'host-1',
-      name: 'kh-home',
-      domain: '.ddns.net',
-      fullHostname: 'kh-home.ddns.net',
-      targetIp: '198.51.100.42',
-      recordType: 'A',
-      lastUpdated: '10 minutes ago',
-      status: 'Active',
-      port: 80,
-    },
-    {
-      id: 'host-2',
-      name: 'cam-yard',
-      domain: '.freedynamicdns.net',
-      fullHostname: 'cam-yard.freedynamicdns.net',
-      targetIp: '198.51.100.42',
-      recordType: 'A',
-      lastUpdated: '2 hours ago',
-      status: 'Active',
-      port: 8000,
-    },
-  ]);
+  // Firebase Firestore Realtime Hostnames Hook
+  const {
+    hostnames,
+    isCloudSynced,
+    addHostname,
+    deleteHostname,
+    updateHostname,
+    refreshHostname,
+    refreshAllHostnames,
+    updateAllHostnamesIp,
+  } = useHostnames(currentIp);
 
   // Audience toggle: 'business' | 'home'
   const [activeAudience, setActiveAudience] = useState<CustomerAudience>('business');
@@ -63,6 +54,14 @@ export default function App() {
   const [isDucSimulatorOpen, setIsDucSimulatorOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isDomainSearchOpen, setIsDomainSearchOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isDnsLookupOpen, setIsDnsLookupOpen] = useState(false);
+  const [dnsLookupInitialDomain, setDnsLookupInitialDomain] = useState<string | undefined>(undefined);
+
+  const handleOpenDnsLookup = (domain?: string) => {
+    setDnsLookupInitialDomain(domain);
+    setIsDnsLookupOpen(true);
+  };
 
   // Cart state
   const [cartItems, setCartItems] = useState([
@@ -83,38 +82,37 @@ export default function App() {
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 3000);
+    setTimeout(() => setToastMessage(null), 3500);
   };
 
-  const handleAddHostname = (newRecord: HostnameRecord) => {
-    setHostnames((prev) => [newRecord, ...prev]);
-    showToast(`Registered ${newRecord.fullHostname} to Anycast DNS!`);
+  const handleAddHostname = async (newRecord: HostnameRecord) => {
+    await addHostname(newRecord);
+    showToast(`Registered ${newRecord.fullHostname} to Anycast DNS (Backed by Cloud Firestore)!`);
   };
 
-  const handleDeleteHostname = (id: string) => {
-    setHostnames((prev) => prev.filter((h) => h.id !== id));
-    showToast('Hostname removed.');
+  const handleDeleteHostname = async (id: string) => {
+    await deleteHostname(id);
+    showToast('Hostname removed from cloud.');
   };
 
-  const handleRefreshHostname = (id: string) => {
-    setHostnames((prev) =>
-      prev.map((h) =>
-        h.id === id ? { ...h, lastUpdated: 'Just now', targetIp: currentIp } : h
-      )
-    );
+  const handleRefreshHostname = async (id: string) => {
+    await refreshHostname(id);
     showToast('DNS record refreshed across all Anycast PoPs.');
   };
 
-  const handleSimulateIpUpdate = (newIp: string) => {
+  const handleRefreshAllHostnames = async () => {
+    await refreshAllHostnames();
+  };
+
+  const handleUpdateHostname = async (id: string, updates: Partial<HostnameRecord>) => {
+    await updateHostname(id, updates);
+    showToast('Hostname DNS records (IPv4/IPv6 AAAA) updated successfully.');
+  };
+
+  const handleSimulateIpUpdate = async (newIp: string) => {
     setCurrentIp(newIp);
-    setHostnames((prev) =>
-      prev.map((h) => ({
-        ...h,
-        targetIp: newIp,
-        lastUpdated: 'Just now (via DUC)',
-      }))
-    );
-    showToast(`DUC updated all hostnames to ${newIp}`);
+    await updateAllHostnamesIp(newIp);
+    showToast(`DUC synced all hostnames to ${newIp} in Cloud Firestore`);
   };
 
   const handleOpenPortChecker = (port?: number, host?: string) => {
@@ -156,6 +154,9 @@ export default function App() {
     el?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const displayEmail = user?.email || (user?.isAnonymous ? 'Guest User' : 'kh…@gmail.com');
+  const isAnonymousUser = user ? user.isAnonymous : true;
+
   return (
     <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 font-sans antialiased selection:bg-[#ff6600]/20 selection:text-[#ff6600] transition-colors duration-200">
       {/* Toast Notification */}
@@ -181,8 +182,11 @@ export default function App() {
         onSelectAudience={(aud) => setActiveAudience(aud)}
         cartCount={cartItems.length}
         onOpenCart={() => setIsCartOpen(true)}
-        userEmail={userEmail}
+        userEmail={displayEmail}
         activeHostnamesCount={hostnames.length}
+        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        isAnonymous={isAnonymousUser}
+        onOpenDnsLookup={handleOpenDnsLookup}
       />
 
       {/* Main Content Areas */}
@@ -193,15 +197,24 @@ export default function App() {
           onAddHostname={handleAddHostname}
           onOpenPortChecker={handleOpenPortChecker}
           onOpenDomainSearch={() => setIsDomainSearchOpen(true)}
+          onOpenDnsLookup={handleOpenDnsLookup}
         />
 
-        {/* User's Dynamic DNS Management Console */}
+        {/* User's Dynamic DNS Management Console with Cloud Firestore Sync Status */}
         <ActiveHostnamesManager
           hostnames={hostnames}
+          currentIp={currentIp}
+          onAddHostname={handleAddHostname}
+          onUpdateHostname={handleUpdateHostname}
           onDeleteHostname={handleDeleteHostname}
           onRefreshHostname={handleRefreshHostname}
+          onRefreshAllHostnames={handleRefreshAllHostnames}
           onOpenPortChecker={handleOpenPortChecker}
           onOpenDucSimulator={() => setIsDucSimulatorOpen(true)}
+          isCloudSynced={isCloudSynced}
+          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          userEmail={displayEmail}
+          onOpenDnsLookup={handleOpenDnsLookup}
         />
 
         {/* How Customers Use No-IP (Business vs. Home) */}
@@ -214,11 +227,19 @@ export default function App() {
         {/* What is DDNS? and What is Managed DNS? Educational Visualizers */}
         <DnsExplainers />
 
-        {/* Trust & Proven Scale Metrics */}
+        {/* Trust & Proven Scale Metrics with Interactive react-simple-maps Anycast World Map */}
         <StatsSection />
 
         {/* Dual CTA: Free Personal DDNS Account vs. Let's Talk Business */}
-        <DualCtaSection onScrollToHostnameForm={handleScrollToHostnameForm} />
+        <DualCtaSection
+          onScrollToHostnameForm={() => {
+            if (isAnonymousUser) {
+              setIsAuthModalOpen(true);
+            } else {
+              handleScrollToHostnameForm();
+            }
+          }}
+        />
 
         {/* Why Choose No-IP as Your DNS Provider? */}
         <WhyChooseNoIp
@@ -229,11 +250,14 @@ export default function App() {
           }}
         />
 
-        {/* Partners & Resellers */}
+        {/* Partners & Resellers with Live API Simulator */}
         <PartnersResellers />
 
-        {/* No-IP News & Knowledge Articles */}
-        <NewsKnowledge />
+        {/* No-IP News & Knowledge Articles & DNS Security Best Practices */}
+        <NewsKnowledge
+          onOpenDnsLookup={handleOpenDnsLookup}
+          onOpenPortChecker={(port, host) => handleOpenPortChecker(port, host)}
+        />
 
         {/* Welcome to Uncomplicated Connectivity Closing Hero */}
         <UncomplicatedConnectivity onGetStarted={handleScrollToHostnameForm} />
@@ -248,6 +272,7 @@ export default function App() {
           const el = document.getElementById('how-customers-use-section');
           el?.scrollIntoView({ behavior: 'smooth' });
         }}
+        onOpenDnsLookup={handleOpenDnsLookup}
       />
 
       {/* Interactive Tool Modals */}
@@ -261,6 +286,14 @@ export default function App() {
           setIsCartOpen(true);
           handleApplyPromoCode('SEP25OFF');
         }}
+      />
+
+      {/* Real-time Public DNS Lookup Modal */}
+      <DnsLookupModal
+        isOpen={isDnsLookupOpen}
+        onClose={() => setIsDnsLookupOpen(false)}
+        initialDomain={dnsLookupInitialDomain}
+        onTestPortOnIp={(ip) => handleOpenPortChecker(80, ip)}
       />
 
       <DucSimulatorModal
@@ -286,6 +319,21 @@ export default function App() {
         onClose={() => setIsDomainSearchOpen(false)}
         onAddToCart={handleAddDomainToCart}
       />
+
+      {/* Firebase Cloud Authentication & Sync Modal */}
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={(msg) => showToast(msg)}
+      />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <NoIpApp />
+    </AuthProvider>
   );
 }

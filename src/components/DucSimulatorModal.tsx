@@ -115,8 +115,8 @@ export const DucSimulatorModal: React.FC<DucSimulatorModalProps> = ({
               {hostnames.map((h) => (
                 <div key={h.id} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg text-xs font-mono">
                   <span className="font-semibold text-slate-800">{h.fullHostname}</span>
-                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px]">
-                    ✓ Synced to {h.targetIp}
+                  <span className="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 text-[10px] truncate max-w-[200px]" title={`${h.targetIp || ''} ${h.targetIpv6 || ''}`}>
+                    ✓ {h.targetIp ? `A: ${h.targetIp}` : ''}{h.targetIp && h.targetIpv6 ? ' • ' : ''}{h.targetIpv6 ? `AAAA: ${h.targetIpv6}` : ''}
                   </span>
                 </div>
               ))}

@@ -16,12 +16,14 @@ interface FooterProps {
   onOpenPortChecker: () => void;
   onOpenDucSimulator: () => void;
   onSelectAudience: (audience: 'business' | 'home') => void;
+  onOpenDnsLookup?: (domain?: string) => void;
 }
 
 export const Footer: React.FC<FooterProps> = ({
   onOpenPortChecker,
   onOpenDucSimulator,
   onSelectAudience,
+  onOpenDnsLookup,
 }) => {
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
@@ -48,6 +50,8 @@ export const Footer: React.FC<FooterProps> = ({
   const resourcesLinks = [
     { label: 'Integrate via API', href: '#integrate-via-api', highlight: true },
     { label: 'API Documents', href: '#integrate-via-api' },
+    { label: 'Real Public DNS Lookup', action: () => onOpenDnsLookup?.(), highlight: true },
+    { label: 'DNS Security Best Practices', href: '#dns-security-best-practices', highlight: true },
     { label: 'Blog', href: '#resources-section' },
     { label: 'Knowledge Base', href: '#resources-section' },
     { label: 'DDNS Keys', href: '#active-hostnames-section' },

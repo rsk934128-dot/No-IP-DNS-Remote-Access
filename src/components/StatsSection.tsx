@@ -1,6 +1,6 @@
 import React from 'react';
 import { Users, Calendar, ThumbsUp, Globe, ArrowDownRight } from 'lucide-react';
-import { WorldMapVisualization } from './WorldMapVisualization';
+import { GlobalNetworkMap } from './GlobalNetworkMap';
 
 export const StatsSection: React.FC = () => {
   const handleScrollToMap = () => {
@@ -110,8 +110,8 @@ export const StatsSection: React.FC = () => {
           ))}
         </div>
 
-        {/* Interactive World Map Highlighting 150+ Points of Presence */}
-        <WorldMapVisualization />
+        {/* Interactive Global Network Map Highlighting 150+ Points of Presence */}
+        <GlobalNetworkMap />
       </div>
     </section>
   );

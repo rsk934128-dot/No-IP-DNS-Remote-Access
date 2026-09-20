@@ -1,0 +1,30 @@
+{
+  "entities": {
+    "UserProfile": {
+      "collection": "users",
+      "fields": {
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "plan": { "type": "string" },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      }
+    },
+    "Hostname": {
+      "collection": "users/{userId}/hostnames",
+      "fields": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "domain": { "type": "string" },
+        "fullHostname": { "type": "string" },
+        "targetIp": { "type": "string" },
+        "recordType": { "type": "string" },
+        "lastUpdated": { "type": "string" },
+        "status": { "type": "string" },
+        "port": { "type": "number" },
+        "createdAt": { "type": "timestamp" },
+        "updatedAt": { "type": "timestamp" }
+      }
+    }
+  }
+}

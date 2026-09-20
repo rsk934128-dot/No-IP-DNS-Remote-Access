@@ -11,7 +11,8 @@ import {
   Copy, 
   Check, 
   AlertCircle,
-  ExternalLink
+  ExternalLink,
+  Search
 } from 'lucide-react';
 import { HostnameRecord } from '../types';
 
@@ -20,6 +21,7 @@ interface HeroSectionProps {
   onAddHostname: (newRecord: HostnameRecord) => void;
   onOpenPortChecker: (prefillPort?: number, prefillHost?: string) => void;
   onOpenDomainSearch: () => void;
+  onOpenDnsLookup?: (domain?: string) => void;
 }
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
@@ -27,6 +29,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onAddHostname,
   onOpenPortChecker,
   onOpenDomainSearch,
+  onOpenDnsLookup,
 }) => {
   const [hostnameInput, setHostnameInput] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('.freedynamicdns.net');
@@ -97,8 +100,21 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center max-w-3xl mx-auto mb-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs text-[#ff914d] font-semibold mb-4 backdrop-blur">
-            <Shield className="w-3.5 h-3.5" /> 25 Years of Trusted High-Reliability DNS
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-4">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs text-[#ff914d] font-semibold backdrop-blur">
+              <Shield className="w-3.5 h-3.5" /> 25 Years of Trusted High-Reliability DNS
+            </div>
+            {onOpenDnsLookup && (
+              <button
+                type="button"
+                onClick={() => onOpenDnsLookup()}
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-xs text-emerald-300 font-bold backdrop-blur transition-all cursor-pointer shadow-xs"
+              >
+                <Search className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Live Public DNS Lookup (DoH)</span>
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              </button>
+            )}
           </div>
 
           <h1 className="text-3xl sm:text-5xl lg:text-5xl font-extrabold tracking-tight text-white leading-tight">
@@ -262,6 +278,17 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </div>
 
                 <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2">
+                  {onOpenDnsLookup && (
+                    <button
+                      onClick={() => onOpenDnsLookup(lastCreatedFqdn)}
+                      type="button"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/60 border border-emerald-300 dark:border-emerald-700 rounded text-xs font-semibold text-emerald-900 dark:text-emerald-200 hover:bg-emerald-200 dark:hover:bg-emerald-800 transition-colors cursor-pointer"
+                    >
+                      <Search className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                      Lookup DNS
+                    </button>
+                  )}
+
                   <button
                     onClick={handleCopyFqdn}
                     type="button"
