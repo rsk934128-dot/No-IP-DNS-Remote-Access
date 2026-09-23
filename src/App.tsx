@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { PromoBanner } from './components/PromoBanner';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
@@ -11,6 +11,7 @@ import { ActiveHostnamesManager } from './components/ActiveHostnamesManager';
 import { CustomerUseCases } from './components/CustomerUseCases';
 import { DnsExplainers } from './components/DnsExplainers';
 import { StatsSection } from './components/StatsSection';
+import { NetworkStatus } from './components/NetworkStatus';
 import { DualCtaSection } from './components/DualCtaSection';
 import { WhyChooseNoIp } from './components/WhyChooseNoIp';
 import { PartnersResellers } from './components/PartnersResellers';
@@ -58,10 +59,10 @@ function NoIpApp() {
   const [isDnsLookupOpen, setIsDnsLookupOpen] = useState(false);
   const [dnsLookupInitialDomain, setDnsLookupInitialDomain] = useState<string | undefined>(undefined);
 
-  const handleOpenDnsLookup = (domain?: string) => {
+  const handleOpenDnsLookup = useCallback((domain?: string) => {
     setDnsLookupInitialDomain(domain);
     setIsDnsLookupOpen(true);
-  };
+  }, []);
 
   // Cart state
   const [cartItems, setCartItems] = useState([
@@ -80,45 +81,45 @@ function NoIpApp() {
   // Toast notification
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 3500);
-  };
+  }, []);
 
-  const handleAddHostname = async (newRecord: HostnameRecord) => {
+  const handleAddHostname = useCallback(async (newRecord: HostnameRecord) => {
     await addHostname(newRecord);
     showToast(`Registered ${newRecord.fullHostname} to Anycast DNS (Backed by Cloud Firestore)!`);
-  };
+  }, [addHostname, showToast]);
 
-  const handleDeleteHostname = async (id: string) => {
+  const handleDeleteHostname = useCallback(async (id: string) => {
     await deleteHostname(id);
     showToast('Hostname removed from cloud.');
-  };
+  }, [deleteHostname, showToast]);
 
-  const handleRefreshHostname = async (id: string) => {
+  const handleRefreshHostname = useCallback(async (id: string) => {
     await refreshHostname(id);
     showToast('DNS record refreshed across all Anycast PoPs.');
-  };
+  }, [refreshHostname, showToast]);
 
-  const handleRefreshAllHostnames = async () => {
+  const handleRefreshAllHostnames = useCallback(async () => {
     await refreshAllHostnames();
-  };
+  }, [refreshAllHostnames]);
 
-  const handleUpdateHostname = async (id: string, updates: Partial<HostnameRecord>) => {
+  const handleUpdateHostname = useCallback(async (id: string, updates: Partial<HostnameRecord>) => {
     await updateHostname(id, updates);
     showToast('Hostname DNS records (IPv4/IPv6 AAAA) updated successfully.');
-  };
+  }, [updateHostname, showToast]);
 
-  const handleSimulateIpUpdate = async (newIp: string) => {
+  const handleSimulateIpUpdate = useCallback(async (newIp: string) => {
     setCurrentIp(newIp);
     await updateAllHostnamesIp(newIp);
     showToast(`DUC synced all hostnames to ${newIp} in Cloud Firestore`);
-  };
+  }, [updateAllHostnamesIp, showToast]);
 
-  const handleOpenPortChecker = (port?: number, host?: string) => {
+  const handleOpenPortChecker = useCallback((port?: number, host?: string) => {
     setPortCheckerPrefill({ port, host });
     setIsPortCheckerOpen(true);
-  };
+  }, []);
 
   const handleApplyPromoCode = (code: string) => {
     if (code.toUpperCase() === 'SEP25OFF') {
@@ -154,7 +155,7 @@ function NoIpApp() {
     el?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const displayEmail = user?.email || (user?.isAnonymous ? 'Guest User' : 'kh…@gmail.com');
+  const displayEmail = user?.email || (user?.isAnonymous ? 'Guest User (fs2217732)' : 'fs2217732@gmail.com');
   const isAnonymousUser = user ? user.isAnonymous : true;
 
   return (
@@ -230,6 +231,9 @@ function NoIpApp() {
         {/* Trust & Proven Scale Metrics with Interactive react-simple-maps Anycast World Map */}
         <StatsSection />
 
+        {/* Anycast PoP Latency & Node Connectivity Health Bar Chart */}
+        <NetworkStatus />
+
         {/* Dual CTA: Free Personal DDNS Account vs. Let's Talk Business */}
         <DualCtaSection
           onScrollToHostnameForm={() => {
@@ -302,6 +306,7 @@ function NoIpApp() {
         hostnames={hostnames}
         currentIp={currentIp}
         onSimulateIpUpdate={handleSimulateIpUpdate}
+        userEmail={displayEmail}
       />
 
       <CartModal
@@ -312,6 +317,7 @@ function NoIpApp() {
         onApplyPromoCode={handleApplyPromoCode}
         hasDiscountApplied={hasDiscountApplied}
         appliedPromoCode={appliedPromoCode}
+        userEmail={displayEmail}
       />
 
       <DomainSearchModal

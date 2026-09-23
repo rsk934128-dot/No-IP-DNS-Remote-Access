@@ -15,16 +15,18 @@ export const WhyChooseNoIp: React.FC<WhyChooseNoIpProps> = ({
       id: 'easy-setup',
       title: 'Easy Setup for Everyone',
       desc: 'Our tools guide you through purchasing and setting up your domain, Dynamic DNS account, or other service, making the process straightforward and hassle-free.',
-      icon: <Sparkles className="w-6 h-6 text-[#ff6600]" />,
+      icon: <Sparkles className="w-5 h-5 text-[#ff6600]" />,
+      image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80',
       badge: 'Intuitive Tools',
       actionLabel: 'View Setup Guides',
       action: onOpenKnowledgeBase,
     },
     {
       id: 'uptime',
-      title: '100% Uptime',
+      title: '100% Uptime Guarantee',
       desc: 'Our robust Anycast Network with 150+ points of presence around the world ensures that your services never experience any downtime. Guaranteed.',
-      icon: <ShieldCheck className="w-6 h-6 text-emerald-600" />,
+      icon: <ShieldCheck className="w-5 h-5 text-emerald-600" />,
+      image: '/src/assets/images/anycast_datacenter_1789920040526.jpg',
       badge: 'Guaranteed SLA',
       actionLabel: 'System Status Live',
       action: () => {
@@ -36,7 +38,8 @@ export const WhyChooseNoIp: React.FC<WhyChooseNoIpProps> = ({
       id: 'support',
       title: 'Comprehensive Support',
       desc: 'Our Support Center is packed with 100s of help articles, troubleshooting tools, and FAQs. And if you get stuck, our US-based Customer Success team is just a phone call away.',
-      icon: <Headphones className="w-6 h-6 text-blue-600" />,
+      icon: <Headphones className="w-5 h-5 text-blue-600" />,
+      image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80',
       badge: 'US-Based Success Team',
       actionLabel: 'Check Troubleshooting Tools',
       action: onOpenPortChecker,
@@ -62,28 +65,44 @@ export const WhyChooseNoIp: React.FC<WhyChooseNoIpProps> = ({
           {reasons.map((item) => (
             <div
               key={item.id}
-              className="bg-slate-50/70 border border-slate-200 rounded-2xl p-7 hover:bg-white hover:border-[#ff6600]/40 transition-all hover:shadow-lg flex flex-col justify-between group"
+              className="bg-slate-50/70 border border-slate-200 rounded-2xl overflow-hidden hover:bg-white hover:border-[#ff6600]/40 transition-all hover:shadow-xl flex flex-col justify-between group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-xs flex items-center justify-center group-hover:scale-105 transition-transform">
+                {/* Visual Thumbnail */}
+                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-200">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-black/15 pointer-events-none" />
+                  
+                  {/* Floating Icon Badge */}
+                  <div className="absolute top-3 left-3 p-2 bg-white/95 backdrop-blur-sm rounded-lg shadow-sm border border-white/40">
                     {item.icon}
                   </div>
-                  <span className="text-[11px] font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-full">
-                    {item.badge}
-                  </span>
+
+                  <div className="absolute bottom-2.5 left-3">
+                    <span className="text-[10px] font-bold text-white bg-slate-900/80 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/10">
+                      {item.badge}
+                    </span>
+                  </div>
                 </div>
 
-                <h3 className="text-lg font-bold text-[#0a2540] mb-3">
-                  {item.title}
-                </h3>
+                <div className="p-6 sm:p-7">
+                  <h3 className="text-lg font-bold text-[#0a2540] group-hover:text-[#ff6600] transition-colors mb-2">
+                    {item.title}
+                  </h3>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                  {item.desc}
-                </p>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
 
-              <div className="pt-6 mt-6 border-t border-slate-200/70">
+              <div className="px-6 sm:px-7 pb-6 pt-3 border-t border-slate-200/70">
                 <button
                   onClick={item.action}
                   className="text-xs font-bold text-[#0a2540] group-hover:text-[#ff6600] flex items-center gap-1.5 transition-colors cursor-pointer"

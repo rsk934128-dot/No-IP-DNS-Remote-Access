@@ -312,6 +312,56 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           )}
         </div>
 
+        {/* Visual Showcase Banner: Global Anycast & DDNS Mesh */}
+        <div className="mt-10 max-w-5xl mx-auto rounded-3xl overflow-hidden border border-slate-700/60 shadow-2xl relative group bg-slate-900/60 backdrop-blur">
+          <div className="relative aspect-[21/9] sm:aspect-[24/9] w-full overflow-hidden bg-slate-950">
+            <img
+              src="/src/assets/images/hero_network_mesh_1789920025314.jpg"
+              alt="Global Dynamic DNS Network and Smart Home Mesh"
+              className="w-full h-full object-cover object-center group-hover:scale-102 transition-transform duration-700 opacity-90"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+            
+            {/* Overlay Live Telemetry Badges */}
+            <div className="absolute top-4 left-4 sm:top-5 sm:left-6 flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur border border-emerald-500/40 text-emerald-300 text-xs font-semibold shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Anycast Global Mesh • 150+ PoPs Active
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-1 px-3 py-1 rounded-full bg-slate-900/80 backdrop-blur border border-slate-700 text-slate-300 text-xs font-medium">
+                Sub-Millisecond DNS Propagation
+              </span>
+            </div>
+
+            <div className="absolute bottom-4 left-4 right-4 sm:bottom-6 sm:left-6 sm:right-6 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-3">
+              <div>
+                <h4 className="text-base sm:text-xl font-bold text-white flex items-center gap-2">
+                  <Wifi className="w-5 h-5 text-[#ff6600]" />
+                  Continuous Dynamic IP Synchronization
+                </h4>
+                <p className="text-xs sm:text-sm text-slate-300 mt-1 max-w-xl">
+                  Automated heartbeat monitors and Dynamic Update Clients synchronize changing ISP IP addresses to your memorable hostname in real time.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById('how-customers-use-section');
+                    el?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="px-3.5 py-1.5 rounded-lg bg-[#ff6600] hover:bg-[#e65c00] text-white text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 cursor-pointer"
+                >
+                  <span>Explore Use Cases</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* 3 Core Solution Cards (Dynamic DNS, Managed DNS, Domain Registration) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-14">
           {/* Card 1: Dynamic DNS */}

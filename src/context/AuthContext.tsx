@@ -57,22 +57,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      setLoading(false);
       if (currentUser) {
-        setUser(currentUser);
-        await syncUserProfile(currentUser);
-        setLoading(false);
-      } else {
-        // Auto-initialize anonymous guest session so database writes work seamlessly
-        try {
-          const cred = await signInAnonymously(auth);
-          setUser(cred.user);
-          await syncUserProfile(cred.user);
-        } catch (anonErr) {
-          console.warn('Anonymous auth failed or not enabled, setting user to null:', anonErr);
-          setUser(null);
-        } finally {
-          setLoading(false);
-        }
+        syncUserProfile(currentUser).catch((err) => {
+          console.warn('Could not sync user profile to Firestore:', err);
+        });
       }
     });
 
@@ -139,10 +129,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setError(null);
     try {
       await fbSignOut(auth);
-      // Re-initialize guest so hostnames can continue to be managed
-      const cred = await signInAnonymously(auth);
-      setUser(cred.user);
-      await syncUserProfile(cred.user);
+      setUser(null);
     } catch (err: any) {
       console.error('Error signing out:', err);
     }

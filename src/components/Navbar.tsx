@@ -47,7 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onSelectAudience,
   cartCount,
   onOpenCart,
-  userEmail = 'kh…@gmail.com',
+  userEmail = 'fs2217732@gmail.com',
   activeHostnamesCount = 2,
   onOpenAuthModal,
   isAnonymous = false,
@@ -59,6 +59,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('English');
+
+  const isCreatorAccount = userEmail?.toLowerCase().includes('fs2217732');
 
 
   const solutionsRef = useRef<HTMLDivElement>(null);
@@ -90,10 +92,17 @@ export const Navbar: React.FC<NavbarProps> = ({
       <div className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-950/80 text-xs text-slate-600 dark:text-slate-400 hidden sm:block">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
+            <button
+              type="button"
+              onClick={() => {
+                document.getElementById('network-status-section')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium hover:underline cursor-pointer"
+              title="View Anycast PoP Latency & Node Connectivity Health"
+            >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              All Systems Operational
-            </span>
+              All Systems Operational • Network Status
+            </button>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <button
               id="topbar-dns-lookup-btn"
@@ -203,15 +212,22 @@ export const Navbar: React.FC<NavbarProps> = ({
                   <div className="border-b border-slate-100 dark:border-slate-800 pb-2.5 mb-2.5">
                     <div className="flex items-center justify-between">
                       <p className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        {isAnonymous ? 'Guest Cloud Session' : 'Firebase Cloud Account'}
+                        {isAnonymous ? 'Guest Cloud Session' : isCreatorAccount ? 'Developer / Owner Account' : 'Firebase Cloud Account'}
                       </p>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                         <Cloud className="w-2.5 h-2.5" /> Firestore
                       </span>
                     </div>
-                    <p className="text-sm font-bold text-[#0a2540] dark:text-white truncate mt-0.5">
-                      {userEmail || 'Anonymous Guest'}
-                    </p>
+                    <div className="flex items-center justify-between mt-1">
+                      <p className="text-sm font-bold text-[#0a2540] dark:text-white truncate">
+                        {userEmail || 'Anonymous Guest'}
+                      </p>
+                      {isCreatorAccount && (
+                        <span className="text-[9px] font-bold px-1.5 py-0.2 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 shrink-0 ml-1">
+                          Creator
+                        </span>
+                      )}
+                    </div>
                     <div className="mt-1.5 flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded w-fit border border-emerald-200/50 dark:border-emerald-800/40">
                       <Activity className="w-3 h-3" /> {activeHostnamesCount} Synced Hostnames
                     </div>

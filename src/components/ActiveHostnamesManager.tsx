@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { 
   Server, 
   ExternalLink, 
@@ -262,6 +262,14 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
     timestamp: string;
   } | null>(null);
 
+  // Backup & Export Engine States
+  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState<boolean>(false);
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
+  const [exportScope, setExportScope] = useState<'all' | 'filtered'>('all');
+  const [includeTelemetry, setIncludeTelemetry] = useState<boolean>(true);
+  const [copiedExportData, setCopiedExportData] = useState<boolean>(false);
+
   // Audio chime synthesizer
   const playAlertChime = useCallback((type: 'alarm' | 'recovery' | 'test' = 'alarm') => {
     if (!alertConfig.soundAlert && type !== 'test') return;
@@ -459,12 +467,16 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
 
     // Outage threshold calculation & alert dispatch
     if (!isReachable) {
+      let shouldTriggerAlert = false;
+      let alertElapsedMinutes = 0;
+
       setDowntimeTracking((prev) => {
         const currentDt = prev[h.id] || { startedAt: Date.now(), alertDispatched: false };
         const elapsedMinutes = (Date.now() - currentDt.startedAt) / 60000;
 
         if (alertConfig.enabled && elapsedMinutes >= alertConfig.thresholdMinutes && !currentDt.alertDispatched) {
-          triggerOutageAlert(h, elapsedMinutes);
+          shouldTriggerAlert = true;
+          alertElapsedMinutes = elapsedMinutes;
           return {
             ...prev,
             [h.id]: {
@@ -480,13 +492,20 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
           [h.id]: currentDt,
         };
       });
+
+      if (shouldTriggerAlert) {
+        triggerOutageAlert(h, alertElapsedMinutes);
+      }
     } else {
+      let shouldTriggerRecovery = false;
+      let recoveryElapsedMinutes = 0;
+
       setDowntimeTracking((prev) => {
         const currentDt = prev[h.id];
         if (currentDt) {
           if (currentDt.alertDispatched) {
-            const elapsedMinutes = (Date.now() - currentDt.startedAt) / 60000;
-            triggerRecoveryAlert(h, elapsedMinutes);
+            shouldTriggerRecovery = true;
+            recoveryElapsedMinutes = (Date.now() - currentDt.startedAt) / 60000;
           }
           const next = { ...prev };
           delete next[h.id];
@@ -494,6 +513,10 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
         }
         return prev;
       });
+
+      if (shouldTriggerRecovery) {
+        triggerRecoveryAlert(h, recoveryElapsedMinutes);
+      }
     }
 
     setProbingHostId(null);
@@ -515,17 +538,20 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
   useEffect(() => {
     if (!isHeartbeatActive) return;
 
-    const interval = setInterval(() => {
-      setHeartbeatCountdown((prev) => {
-        if (prev <= 1) {
-          probeAllHostnames(false);
-          return 30;
-        }
-        return prev - 1;
-      });
+    // Countdown interval (1s)
+    const countdownTimer = setInterval(() => {
+      setHeartbeatCountdown((prev) => (prev <= 1 ? 30 : prev - 1));
     }, 1000);
 
-    return () => clearInterval(interval);
+    // Periodic probe interval (30s)
+    const probeTimer = setInterval(() => {
+      probeAllHostnames(false);
+    }, 30000);
+
+    return () => {
+      clearInterval(countdownTimer);
+      clearInterval(probeTimer);
+    };
   }, [isHeartbeatActive, probeAllHostnames]);
 
   const handleToggleHeartbeatMonitor = () => {
@@ -681,17 +707,20 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
   useEffect(() => {
     if (!autoRefresh) return;
 
-    const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          triggerRefresh(false);
-          return 60;
-        }
-        return prev - 1;
-      });
+    // Countdown interval (1s)
+    const countdownTimer = setInterval(() => {
+      setCountdown((prev) => (prev <= 1 ? 60 : prev - 1));
     }, 1000);
 
-    return () => clearInterval(timer);
+    // Periodic refresh interval (60s)
+    const refreshTimer = setInterval(() => {
+      triggerRefresh(false);
+    }, 60000);
+
+    return () => {
+      clearInterval(countdownTimer);
+      clearInterval(refreshTimer);
+    };
   }, [autoRefresh, triggerRefresh]);
 
   const handleToggleAutoRefresh = () => {
@@ -854,13 +883,6 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
   // --------------------------------------------------------------------------
   // BACKUP & EXPORT ENGINE (JSON & CSV)
   // --------------------------------------------------------------------------
-  const [isExportModalOpen, setIsExportModalOpen] = useState<boolean>(false);
-  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState<boolean>(false);
-  const [exportFormat, setExportFormat] = useState<'json' | 'csv'>('json');
-  const [exportScope, setExportScope] = useState<'all' | 'filtered'>('all');
-  const [includeTelemetry, setIncludeTelemetry] = useState<boolean>(true);
-  const [copiedExportData, setCopiedExportData] = useState<boolean>(false);
-
   const generateExportString = useCallback((format: 'json' | 'csv', scope: 'all' | 'filtered', withStats: boolean) => {
     const targetList = scope === 'filtered' ? filteredHostnames : hostnames;
     const nowIso = new Date().toISOString();
@@ -871,7 +893,8 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
           system: "No-IP Dynamic DNS Remote Access & DNS Security Manager",
           version: "1.2.0",
           exportTimestamp: nowIso,
-          accountEmail: userEmail || "guest@ddns.local",
+          accountEmail: userEmail || "fs2217732@gmail.com",
+          author: "fs2217732 (fs2217732@gmail.com)",
           totalRecords: targetList.length,
           scope: scope === 'filtered' ? `Filtered (${activeFilter})` : "All Hostnames",
           containsTelemetry: withStats,

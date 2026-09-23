@@ -18,6 +18,7 @@ interface CartModalProps {
   onApplyPromoCode: (code: string) => boolean;
   hasDiscountApplied: boolean;
   appliedPromoCode: string;
+  userEmail?: string;
 }
 
 export const CartModal: React.FC<CartModalProps> = ({
@@ -28,6 +29,7 @@ export const CartModal: React.FC<CartModalProps> = ({
   onApplyPromoCode,
   hasDiscountApplied,
   appliedPromoCode,
+  userEmail = 'fs2217732@gmail.com',
 }) => {
   const [promoInput, setPromoInput] = useState(appliedPromoCode || '');
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -88,7 +90,7 @@ export const CartModal: React.FC<CartModalProps> = ({
             </div>
             <h4 className="text-lg font-bold text-[#0a2540]">Order Confirmed!</h4>
             <p className="text-xs text-slate-600 max-w-xs mx-auto">
-              Thank you! Your Enhanced Dynamic DNS and Public Tunnels subscription is now active on your account (kh…@gmail.com).
+              Thank you! Your Enhanced Dynamic DNS and Public Tunnels subscription is now active on your account ({userEmail}).
             </p>
             <button
               onClick={onClose}

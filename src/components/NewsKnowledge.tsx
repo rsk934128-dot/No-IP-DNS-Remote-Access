@@ -126,6 +126,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Cybersecurity',
       date: 'Updated 2026',
       readTime: '7 min read',
+      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
       excerpt: 'How attackers exploit legacy UDP port 53 to spoof domain resolutions, how the Kaminsky flaw forged responses, and why DNSSEC and encrypted DoH/DoT make poisoning mathematically impossible.',
     },
     {
@@ -134,6 +135,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Developer API',
       date: 'Updated 2026',
       readTime: '6 min read',
+      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
       excerpt: 'Official specification for programmatic DNS updates via HTTP GET, RFC 7617 Basic Authentication, custom User-Agent policies, and return code reference matrices.',
     },
     {
@@ -142,6 +144,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Router Guides',
       date: 'September 2026',
       readTime: '4 min read',
+      image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80',
       excerpt: 'Most modern wireless routers have No-IP DDNS built right into the admin firmware. Follow this step-by-step walkthrough to configure automated IP synchronization in under 3 minutes.',
     },
     {
@@ -150,6 +153,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Remote Access',
       date: 'August 2026',
       readTime: '6 min read',
+      image: '/src/assets/images/port_forwarding_tools_1789671685947.jpg',
       excerpt: 'Learn the difference between traditional NAT port forwarding and encrypted Public Tunnels. Understand how Public Tunnels solves CGNAT barriers without opening inbound firewall ports.',
     },
     {
@@ -158,6 +162,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Engineering & Infrastructure',
       date: 'July 2026',
       readTime: '5 min read',
+      image: '/src/assets/images/anycast_datacenter_1789920040526.jpg',
       excerpt: 'A deep dive into how 150+ Points of Presence use BGP Anycast routing to automatically route customer queries to the nearest, fastest, and most resilient data center.',
     },
   ];
@@ -728,35 +733,58 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
             {articles.map((item) => (
               <div
                 key={item.id}
-                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-6 hover:shadow-lg transition-all flex flex-col justify-between hover:border-[#ff6600]/40 group"
+                className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-xl transition-all flex flex-col justify-between hover:border-[#ff6600]/40 group"
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
-                    <span className="bg-orange-50 dark:bg-orange-950/50 text-[#ff6600] dark:text-[#ff914d] px-2.5 py-0.5 rounded-full font-bold text-[10px] border border-orange-200/50 dark:border-orange-800/40">
-                      {item.category}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <span>{item.date}</span>
-                      <span>•</span>
-                      <span>{item.readTime}</span>
+                  {/* Article Thumbnail Image */}
+                  {item.image && (
+                    <div className="relative aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-900">
+                      <img
+                        src={item.image}
+                        alt={item.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-black/10 pointer-events-none" />
+                      <div className="absolute top-2.5 left-2.5">
+                        <span className="bg-slate-900/85 backdrop-blur text-white px-2.5 py-0.5 rounded-full font-bold text-[10px] border border-white/20">
+                          {item.category}
+                        </span>
+                      </div>
                     </div>
+                  )}
+
+                  <div className="p-5 sm:p-6">
+                    <div className="flex items-center justify-between text-xs text-slate-400 mb-2.5">
+                      {!item.image && (
+                        <span className="bg-orange-50 dark:bg-orange-950/50 text-[#ff6600] dark:text-[#ff914d] px-2.5 py-0.5 rounded-full font-bold text-[10px] border border-orange-200/50 dark:border-orange-800/40">
+                          {item.category}
+                        </span>
+                      )}
+                      <div className="flex items-center gap-2 ml-auto">
+                        <span>{item.date}</span>
+                        <span>•</span>
+                        <span>{item.readTime}</span>
+                      </div>
+                    </div>
+
+                    <h3 className="text-base font-bold text-[#0a2540] dark:text-white group-hover:text-[#ff6600] dark:group-hover:text-[#ff914d] transition-colors mb-2 leading-snug">
+                      {item.title}
+                    </h3>
+
+                    <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                      {item.excerpt}
+                    </p>
                   </div>
-
-                  <h3 className="text-base font-bold text-[#0a2540] dark:text-white group-hover:text-[#ff6600] dark:group-hover:text-[#ff914d] transition-colors mb-2 leading-snug">
-                    {item.title}
-                  </h3>
-
-                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                    {item.excerpt}
-                  </p>
                 </div>
 
-                <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-700/60">
+                <div className="px-5 sm:px-6 pb-5 pt-3 border-t border-slate-100 dark:border-slate-700/60">
                   <button
                     onClick={() => setSelectedArticle(item)}
                     className="text-xs font-bold text-[#0a2540] dark:text-white group-hover:text-[#ff6600] dark:group-hover:text-[#ff914d] flex items-center gap-1 transition-colors cursor-pointer"
                   >
-                    Read Article
+                    Read Technical Guide
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -769,31 +797,65 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       {/* Article Reader Modal */}
       {selectedArticle && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-xs">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 text-slate-900 dark:text-slate-100">
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-              <div>
-                <span className="text-[11px] font-bold text-[#ff6600] uppercase tracking-wider">
-                  {selectedArticle.category}
-                </span>
-                <h3 className="text-xl font-bold text-[#0a2540] dark:text-white mt-1">
-                  {selectedArticle.title}
-                </h3>
-                <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
-                  <span>Published {selectedArticle.date}</span>
-                  <span>•</span>
-                  <span>{selectedArticle.readTime}</span>
+          <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 animate-in fade-in zoom-in-95 duration-150 text-slate-900 dark:text-slate-100">
+            {/* Modal Header Image Banner */}
+            {selectedArticle.image ? (
+              <div className="relative aspect-[21/9] w-full overflow-hidden bg-slate-900">
+                <img
+                  src={selectedArticle.image}
+                  alt={selectedArticle.title}
+                  className="w-full h-full object-cover"
+                  referrerPolicy="no-referrer"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-black/20" />
+                
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="absolute top-3 right-3 text-white/80 hover:text-white bg-black/50 hover:bg-black/70 p-1.5 rounded-full backdrop-blur transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="absolute bottom-3 left-5 right-5">
+                  <span className="text-[10px] font-bold text-[#ff914d] uppercase tracking-wider bg-black/60 px-2 py-0.5 rounded backdrop-blur">
+                    {selectedArticle.category}
+                  </span>
+                  <h3 className="text-lg sm:text-xl font-bold text-white mt-1 leading-snug drop-shadow-sm">
+                    {selectedArticle.title}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-slate-300 mt-1">
+                    <span>Published {selectedArticle.date}</span>
+                    <span>•</span>
+                    <span>{selectedArticle.readTime}</span>
+                  </div>
                 </div>
               </div>
+            ) : (
+              <div className="flex items-start justify-between p-6 pb-4 border-b border-slate-100 dark:border-slate-800">
+                <div>
+                  <span className="text-[11px] font-bold text-[#ff6600] uppercase tracking-wider">
+                    {selectedArticle.category}
+                  </span>
+                  <h3 className="text-xl font-bold text-[#0a2540] dark:text-white mt-1">
+                    {selectedArticle.title}
+                  </h3>
+                  <div className="flex items-center gap-3 text-xs text-slate-400 mt-1">
+                    <span>Published {selectedArticle.date}</span>
+                    <span>•</span>
+                    <span>{selectedArticle.readTime}</span>
+                  </div>
+                </div>
 
-              <button
-                onClick={() => setSelectedArticle(null)}
-                className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+                <button
+                  onClick={() => setSelectedArticle(null)}
+                  className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 p-1 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            )}
 
-            <div className="py-5 space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-h-[60vh] overflow-y-auto leading-relaxed">
+            <div className="p-6 pt-4 space-y-4 text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-h-[55vh] overflow-y-auto leading-relaxed">
               <p className="font-semibold text-slate-800 dark:text-slate-200">
                 {selectedArticle.excerpt}
               </p>

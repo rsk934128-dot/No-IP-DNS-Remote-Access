@@ -8,6 +8,7 @@ interface DucSimulatorModalProps {
   hostnames: HostnameRecord[];
   currentIp: string;
   onSimulateIpUpdate: (newIp: string) => void;
+  userEmail?: string;
 }
 
 export const DucSimulatorModal: React.FC<DucSimulatorModalProps> = ({
@@ -16,11 +17,12 @@ export const DucSimulatorModal: React.FC<DucSimulatorModalProps> = ({
   hostnames,
   currentIp,
   onSimulateIpUpdate,
+  userEmail = 'fs2217732@gmail.com',
 }) => {
   const [isRunning, setIsRunning] = useState(true);
   const [logs, setLogs] = useState<string[]>([
     `[${new Date().toLocaleTimeString()}] No-IP DUC v4.1.2 service initialized.`,
-    `[${new Date().toLocaleTimeString()}] Authenticated as kh…@gmail.com (Personal Plan).`,
+    `[${new Date().toLocaleTimeString()}] Authenticated as ${userEmail} (Developer & Personal Plan).`,
     `[${new Date().toLocaleTimeString()}] Current WAN IP detected: ${currentIp}`,
     `[${new Date().toLocaleTimeString()}] Monitoring ${hostnames.length} active dynamic hostnames.`,
   ]);

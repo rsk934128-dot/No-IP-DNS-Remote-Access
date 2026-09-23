@@ -16,9 +16,9 @@ import { useAuth } from '../context/AuthContext';
 const DEFAULT_SEED_HOSTNAMES: HostnameRecord[] = [
   {
     id: 'host-1',
-    name: 'kh-home',
+    name: 'fs-gateway',
     domain: '.ddns.net',
-    fullHostname: 'kh-home.ddns.net',
+    fullHostname: 'fs-gateway.ddns.net',
     targetIp: '198.51.100.42',
     targetIpv6: '2001:db8:85a3::8a2e:370:7334',
     recordType: 'DUAL',

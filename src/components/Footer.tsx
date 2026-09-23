@@ -134,12 +134,19 @@ export const Footer: React.FC<FooterProps> = ({
       {/* Main Footer Links Columns */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
-          {/* Column 1: Direct Support / Phone */}
+          {/* Column 1: Direct Support & Developer Profile */}
           <div className="col-span-2 md:col-span-1 space-y-4">
             <h4 className="font-bold text-white uppercase tracking-wider text-[11px]">
-              Direct Contact
+              Author & Direct Contact
             </h4>
             <div className="space-y-2">
+              <a
+                href="mailto:fs2217732@gmail.com"
+                className="flex items-center gap-2 text-slate-300 hover:text-[#ff6600] transition-colors"
+              >
+                <Mail className="w-3.5 h-3.5 text-[#ff6600]" />
+                <span className="font-medium">fs2217732@gmail.com</span>
+              </a>
               <a
                 href="tel:+17758531883"
                 className="flex items-center gap-2 text-slate-300 hover:text-[#ff6600] transition-colors"
@@ -147,19 +154,15 @@ export const Footer: React.FC<FooterProps> = ({
                 <Phone className="w-3.5 h-3.5 text-[#ff6600]" />
                 <span>+1 775-853-1883</span>
               </a>
-              <a
-                href="mailto:support@noip.com"
-                className="flex items-center gap-2 text-slate-300 hover:text-[#ff6600] transition-colors"
-              >
-                <Mail className="w-3.5 h-3.5 text-[#ff6600]" />
-                <span>support@noip.com</span>
-              </a>
             </div>
 
-            <div className="p-3 bg-slate-900 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1">
-              <span className="font-bold text-slate-300 block">Do you need help?</span>
-              <p>
-                We will provide detailed information about our services, types of work, and top projects.
+            <div className="p-3.5 bg-slate-900/90 rounded-xl border border-slate-800 text-[11px] text-slate-400 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-slate-200 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                <span>Created by fs2217732</span>
+              </div>
+              <p className="text-slate-400 leading-relaxed">
+                Personalized dynamic DNS & remote port forwarding suite configured for <strong className="text-slate-300">fs2217732</strong>.
               </p>
             </div>
           </div>
@@ -270,25 +273,37 @@ export const Footer: React.FC<FooterProps> = ({
       {/* System Status & Copyright Bottom Bar */}
       <div className="border-t border-slate-800 bg-slate-950 py-5 text-slate-500 text-[11px]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="space-y-0.5 text-center md:text-left">
+          <div className="space-y-1 text-center md:text-left">
             <p>©1999-2026 • Vitalwerks Internet Solutions, LLC dba No-IP • All Rights Reserved.</p>
-            <p>©2026 • No-IP Technologies, LLC • All Rights Reserved.</p>
+            <p className="flex items-center justify-center md:justify-start gap-1.5 text-slate-400">
+              <span>Engineered & Customized by</span>
+              <span className="font-bold text-[#ff914d] bg-[#ff914d]/10 px-1.5 py-0.5 rounded border border-[#ff914d]/20">fs2217732</span>
+              <span>•</span>
+              <a href="mailto:fs2217732@gmail.com" className="text-slate-300 hover:text-white underline underline-offset-2">
+                fs2217732@gmail.com
+              </a>
+            </p>
           </div>
 
           {/* System Status Bar */}
-          <div 
+          <button 
             id="footer-system-status"
-            className="flex flex-wrap items-center justify-center gap-3 bg-slate-900 px-3.5 py-1.5 rounded-lg border border-slate-800 text-slate-400"
+            type="button"
+            onClick={() => {
+              document.getElementById('network-status-section')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="flex flex-wrap items-center justify-center gap-3 bg-slate-900 hover:bg-slate-850 px-3.5 py-1.5 rounded-lg border border-slate-800 hover:border-emerald-500/40 text-slate-400 hover:text-slate-200 transition-all cursor-pointer text-left"
+            title="Inspect Live Anycast PoP Latency Spectrum"
           >
             <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span>No-IP System Status: All Systems Operational</span>
+              <span>No-IP System Status: All Systems Operational (150 PoPs)</span>
             </div>
             <span className="text-slate-700 hidden sm:inline">|</span>
             <span className="font-mono text-[10px] text-slate-500">
-              ss@ab2f9957a 2026-09-11T18:30:58Z web02
+              Latency Spectrum & Node Health →
             </span>
-          </div>
+          </button>
         </div>
       </div>
     </footer>

@@ -27,6 +27,7 @@ interface CaseItem {
   id: string;
   title: string;
   desc: string;
+  image: string;
   icon: React.ReactNode;
   tags: string[];
   fullDetails: {
@@ -48,7 +49,8 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'multi-location',
       title: 'Manage Multi-Location Networks',
       desc: 'Ensure reliable access to devices, servers, and critical services across your enterprise, simplifying network management and maximizing uptime.',
-      icon: <Network className="w-6 h-6 text-blue-600" />,
+      image: '/src/assets/images/anycast_datacenter_1789920040526.jpg',
+      icon: <Network className="w-5 h-5 text-blue-600" />,
       tags: ['Branch Offices', 'SD-WAN', 'Multi-Site IP'],
       fullDetails: {
         overview: 'Organizations operating retail chains, remote branches, or satellite offices often face the challenge of dynamic public IPs assigned by local ISPs. No-IP dynamically syncs every branch router with a unified corporate sub-domain, preventing connectivity drops.',
@@ -65,7 +67,8 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'sysadmin',
       title: 'Perform System Administration',
       desc: 'Acquire and configure domains, manage DNS zones and corporate firewalls, and more with our full system admin suite.',
-      icon: <Sliders className="w-6 h-6 text-[#ff6600]" />,
+      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+      icon: <Sliders className="w-5 h-5 text-[#ff6600]" />,
       tags: ['DNS Zones', 'Firewall Rules', 'API Automation'],
       fullDetails: {
         overview: 'System administrators need reliable programmatic control over DNS records, reverse lookups, TTL controls, and automated SSL certificate renewals without complex server overhead.',
@@ -82,7 +85,8 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'security-monitoring',
       title: 'Security and Alarm Monitoring',
       desc: 'Provide clients with reliable, secure remote access to their security cameras, alarms, and surveillance systems—anytime, anywhere.',
-      icon: <Cctv className="w-6 h-6 text-emerald-600" />,
+      image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80',
+      icon: <Cctv className="w-5 h-5 text-emerald-600" />,
       tags: ['CCTV / NVR', 'Alarm Panels', 'White-Label DDNS'],
       fullDetails: {
         overview: 'Alarm integrators and surveillance technicians install thousands of DVR/NVR recorders that require remote viewing apps for homeowners and property managers. No-IP provides dedicated DDNS profiles so camera feeds never drop.',
@@ -102,7 +106,8 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'gaming-rdp',
       title: 'Remote Desktop & Gaming Servers',
       desc: 'Host your own Minecraft, Palworld, Valheim, or Discord bot servers, or access your high-performance home workstation from anywhere via Windows RDP or Parsec.',
-      icon: <Gamepad2 className="w-6 h-6 text-purple-600" />,
+      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+      icon: <Gamepad2 className="w-5 h-5 text-purple-600" />,
       tags: ['Minecraft 25565', 'Windows RDP 3389', 'Zero Lag'],
       fullDetails: {
         overview: 'Share a single, memorable address like "alex-mc.ddns.net" with your friends instead of texting them your changing numeric IP address every time your home router reboots.',
@@ -119,7 +124,8 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'home-nas-cloud',
       title: 'Private Cloud & Media Servers (Plex / NAS)',
       desc: 'Stream your music, 4K movies, and sync personal photos securely to Synology, TrueNAS, unRAID, or Nextcloud without third-party subscription fees.',
-      icon: <HardDrive className="w-6 h-6 text-blue-600" />,
+      image: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80',
+      icon: <HardDrive className="w-5 h-5 text-blue-600" />,
       tags: ['Synology', 'Nextcloud', 'TrueNAS / unRAID'],
       fullDetails: {
         overview: 'Take full ownership of your personal data. Connect your mobile phone to your home storage drive from any cellular network with end-to-end SSL encryption.',
@@ -136,7 +142,8 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'smart-home-iot',
       title: 'Smart Home & Home Assistant Remote Access',
       desc: 'Control your smart lights, thermostats, garage doors, and Zigbee sensors via Home Assistant, ESPHome, or Node-RED from the road.',
-      icon: <Tv className="w-6 h-6 text-amber-600" />,
+      image: '/src/assets/images/smart_home_iot_1789920056637.jpg',
+      icon: <Tv className="w-5 h-5 text-amber-600" />,
       tags: ['Home Assistant', 'Node-RED', 'IoT Automation'],
       fullDetails: {
         overview: 'Remotely access your Home Assistant dashboard (port 8123) without paying monthly cloud companion subscriptions. Receive instant push alerts when motion is detected.',
@@ -199,32 +206,47 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
           {currentList.map((item) => (
             <div
               key={item.id}
-              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-xs hover:shadow-md transition-all flex flex-col justify-between hover:border-[#0a2540]/30"
+              className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-xl transition-all flex flex-col justify-between hover:border-[#ff6600]/40 group"
             >
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
+                {/* Visual Thumbnail Banner */}
+                <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-black/10 pointer-events-none" />
+                  
+                  {/* Floating Icon badge */}
+                  <div className="absolute top-3 left-3 p-2 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm rounded-lg shadow-md border border-white/40">
                     {item.icon}
                   </div>
-                  <div className="flex flex-wrap gap-1 justify-end">
+
+                  {/* Tags on bottom of image */}
+                  <div className="absolute bottom-2.5 left-3 right-3 flex flex-wrap gap-1">
                     {item.tags.map((tag) => (
-                      <span key={tag} className="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded font-medium">
+                      <span key={tag} className="text-[10px] bg-slate-900/80 backdrop-blur-xs text-slate-100 px-2 py-0.5 rounded font-medium border border-white/10">
                         {tag}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <h3 className="text-lg font-bold text-[#0a2540] mb-2 leading-snug">
-                  {item.title}
-                </h3>
+                <div className="p-5 sm:p-6">
+                  <h3 className="text-lg font-bold text-[#0a2540] group-hover:text-[#ff6600] transition-colors mb-2 leading-snug">
+                    {item.title}
+                  </h3>
 
-                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4">
-                  {item.desc}
-                </p>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                    {item.desc}
+                  </p>
+                </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+              <div className="px-5 sm:px-6 pb-5 pt-3 border-t border-slate-100 flex items-center justify-between">
                 <button
                   id={`learn-more-${item.id}-btn`}
                   onClick={() => setSelectedCaseModal(item)}
@@ -250,31 +272,40 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       {/* Learn More Details Modal */}
       {selectedCaseModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl max-w-xl w-full p-6 sm:p-7 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-start justify-between gap-3 pb-4 border-b border-slate-100">
-              <div className="flex items-center gap-3">
-                <div className="p-2.5 bg-orange-50 text-[#ff6600] rounded-xl border border-orange-100">
+          <div className="bg-white rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Image Header */}
+            <div className="relative aspect-[21/9] w-full overflow-hidden bg-slate-900">
+              <img
+                src={selectedCaseModal.image}
+                alt={selectedCaseModal.title}
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/30 to-transparent" />
+              
+              <button
+                onClick={() => setSelectedCaseModal(null)}
+                className="absolute top-3 right-3 text-white/80 hover:text-white bg-black/40 hover:bg-black/60 p-1.5 rounded-full backdrop-blur transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+
+              <div className="absolute bottom-3 left-4 right-4 flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-md">
                   {selectedCaseModal.icon}
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[#0a2540]">
+                  <h3 className="text-lg font-bold text-white leading-tight">
                     {selectedCaseModal.title}
                   </h3>
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-300">
                     Detailed Solution Blueprint & Architecture
                   </p>
                 </div>
               </div>
-
-              <button
-                onClick={() => setSelectedCaseModal(null)}
-                className="text-slate-400 hover:text-slate-700 p-1 rounded-md"
-              >
-                <X className="w-5 h-5" />
-              </button>
             </div>
 
-            <div className="py-4 space-y-4 text-xs sm:text-sm text-slate-700 max-h-[60vh] overflow-y-auto pr-1">
+            <div className="p-6 space-y-4 text-xs sm:text-sm text-slate-700 max-h-[55vh] overflow-y-auto pr-2">
               <div>
                 <h4 className="font-bold text-[#0a2540] uppercase tracking-wider text-xs mb-1">Overview</h4>
                 <p className="text-slate-600 leading-relaxed">{selectedCaseModal.fullDetails.overview}</p>

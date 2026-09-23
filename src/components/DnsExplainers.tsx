@@ -35,16 +35,32 @@ export const DnsExplainers: React.FC = () => {
           {/* Card 1: What is DDNS? */}
           <div 
             id="ddns-explainer-section" 
-            className="bg-gradient-to-br from-slate-50 to-orange-50/30 rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col justify-between"
+            className="bg-gradient-to-br from-slate-50 to-orange-50/30 rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div>
-              <div className="flex items-center gap-2 text-[#ff6600] font-bold text-xs uppercase tracking-wider mb-2">
-                <Radio className="w-4 h-4" /> Core Technology
+            {/* Visual Image Banner */}
+            <div className="relative aspect-[21/8] w-full overflow-hidden bg-slate-900">
+              <img
+                src="/src/assets/images/smart_home_iot_1789920056637.jpg"
+                alt="Smart Home IoT and Router DDNS Connection"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+              <div className="absolute bottom-3 left-4 flex items-center gap-2 text-white">
+                <span className="p-1.5 bg-[#ff6600] rounded-lg">
+                  <Radio className="w-4 h-4 text-white" />
+                </span>
+                <span className="font-bold text-xs uppercase tracking-wider text-orange-200">
+                  Core Dynamic DNS Technology
+                </span>
               </div>
+            </div>
+
+            <div className="p-6 sm:p-8">
               <h3 className="text-2xl font-bold text-[#0a2540] tracking-tight">
                 What is DDNS?
               </h3>
-              <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                 Dynamic DNS (DDNS) is a service that automatically updates your domain name to match your changing IP address. Most home internet connections use dynamic IPs, which can make it hard to remotely access your networked devices. That’s where DDNS comes in.
               </p>
 
@@ -55,7 +71,7 @@ export const DnsExplainers: React.FC = () => {
                   <button
                     onClick={cycleIp}
                     type="button"
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-100 hover:bg-orange-200 text-[#ff6600] rounded-md font-bold text-[11px] transition-colors"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-orange-100 hover:bg-orange-200 text-[#ff6600] rounded-md font-bold text-[11px] transition-colors cursor-pointer"
                   >
                     <RotateCw className="w-3 h-3" /> Simulate ISP IP Change
                   </button>
@@ -99,7 +115,7 @@ export const DnsExplainers: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-between text-xs">
+            <div className="px-6 sm:px-8 pb-6 pt-4 border-t border-slate-200/60 flex items-center justify-between text-xs">
               <span className="text-slate-500 font-medium">Free personal hostnames available</span>
               <a
                 href="#hostname-creator-form"
@@ -113,16 +129,32 @@ export const DnsExplainers: React.FC = () => {
           {/* Card 2: What is Managed DNS? */}
           <div 
             id="managed-dns-explainer-section" 
-            className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200 p-6 sm:p-8 flex flex-col justify-between"
+            className="bg-gradient-to-br from-slate-50 to-blue-50/30 rounded-2xl border border-slate-200 overflow-hidden shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
           >
-            <div>
-              <div className="flex items-center gap-2 text-blue-600 font-bold text-xs uppercase tracking-wider mb-2">
-                <Server className="w-4 h-4" /> Global Infrastructure
+            {/* Visual Image Banner */}
+            <div className="relative aspect-[21/8] w-full overflow-hidden bg-slate-900">
+              <img
+                src="/src/assets/images/anycast_datacenter_1789920040526.jpg"
+                alt="Global Anycast Datacenter and Server Architecture"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+              <div className="absolute bottom-3 left-4 flex items-center gap-2 text-white">
+                <span className="p-1.5 bg-blue-600 rounded-lg">
+                  <Server className="w-4 h-4 text-white" />
+                </span>
+                <span className="font-bold text-xs uppercase tracking-wider text-blue-200">
+                  Global Anycast Infrastructure
+                </span>
               </div>
+            </div>
+
+            <div className="p-6 sm:p-8">
               <h3 className="text-2xl font-bold text-[#0a2540] tracking-tight">
                 What is Managed DNS?
               </h3>
-              <p className="mt-3 text-sm text-slate-600 leading-relaxed">
+              <p className="mt-2 text-sm text-slate-600 leading-relaxed">
                 Managed DNS is a service that routes traffic to your domain name using a global network of authoritative DNS servers. Instead of running and maintaining your own DNS infrastructure, managed DNS lets you rely on a fast, secure, and redundant platform built for performance and uptime.
               </p>
 
@@ -170,7 +202,7 @@ export const DnsExplainers: React.FC = () => {
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-slate-200/60 flex items-center justify-between text-xs">
+            <div className="px-6 sm:px-8 pb-6 pt-4 border-t border-slate-200/60 flex items-center justify-between text-xs">
               <span className="text-slate-500 font-medium">Enterprise Anycast routing</span>
               <a
                 href="#talk-business"

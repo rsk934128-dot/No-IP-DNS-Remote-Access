@@ -69,6 +69,7 @@ export interface NewsItem {
   date: string;
   readTime: string;
   excerpt: string;
+  image?: string;
 }
 
 export type CustomerAudience = 'business' | 'home';
