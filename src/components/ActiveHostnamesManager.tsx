@@ -83,6 +83,16 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
   userEmail,
   onOpenDnsLookup,
 }) => {
+  // Stable refs for props & helper functions to prevent cascade re-renders and timer rebuilds
+  const hostnamesRef = useRef(hostnames);
+  hostnamesRef.current = hostnames;
+
+  const onRefreshAllHostnamesRef = useRef(onRefreshAllHostnames);
+  onRefreshAllHostnamesRef.current = onRefreshAllHostnames;
+
+  const onRefreshHostnameRef = useRef(onRefreshHostname);
+  onRefreshHostnameRef.current = onRefreshHostname;
+
   const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Auto-Refresh DNS state (persisted in localStorage, defaults to true)
@@ -144,9 +154,11 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
   // Keep heartbeats map in sync when hostnames change
   useEffect(() => {
     setHeartbeats((prev) => {
+      let missingFound = false;
       const next = { ...prev };
       hostnames.forEach((h) => {
         if (!next[h.id]) {
+          missingFound = true;
           next[h.id] = {
             hostnameId: h.id,
             isReachable: true,
@@ -161,7 +173,7 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
           };
         }
       });
-      return next;
+      return missingFound ? next : prev;
     });
   }, [hostnames]);
 
@@ -522,17 +534,23 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
     setProbingHostId(null);
   }, [simulatedOutages, alertConfig, triggerOutageAlert, triggerRecoveryAlert]);
 
+  const probeSingleHostnameRef = useRef(probeSingleHostname);
+  probeSingleHostnameRef.current = probeSingleHostname;
+
   const probeAllHostnames = useCallback(async (showToastNotice = true) => {
     setIsProbingAll(true);
-    for (const h of hostnames) {
-      await probeSingleHostname(h);
+    for (const h of hostnamesRef.current) {
+      await probeSingleHostnameRef.current(h);
     }
     setIsProbingAll(false);
     if (showToastNotice) {
       setStatusNotification('Heartbeat probe completed: All hostnames tested for reachability.');
       setTimeout(() => setStatusNotification(null), 3500);
     }
-  }, [hostnames, probeSingleHostname]);
+  }, []);
+
+  const probeAllHostnamesRef = useRef(probeAllHostnames);
+  probeAllHostnamesRef.current = probeAllHostnames;
 
   // Periodic Heartbeat Timer (runs every 30 seconds when isHeartbeatActive)
   useEffect(() => {
@@ -545,14 +563,14 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
 
     // Periodic probe interval (30s)
     const probeTimer = setInterval(() => {
-      probeAllHostnames(false);
+      probeAllHostnamesRef.current(false);
     }, 30000);
 
     return () => {
       clearInterval(countdownTimer);
       clearInterval(probeTimer);
     };
-  }, [isHeartbeatActive, probeAllHostnames]);
+  }, [isHeartbeatActive]);
 
   const handleToggleHeartbeatMonitor = () => {
     const next = !isHeartbeatActive;
@@ -564,33 +582,29 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
     }
     if (next) {
       setHeartbeatCountdown(30);
-      probeAllHostnames(false);
+      probeAllHostnamesRef.current(false);
     }
   };
 
   const handleToggleSimulatedOutage = (hostId: string) => {
-    setSimulatedOutages((prev) => {
-      const isCurrentlyDown = Boolean(prev[hostId]);
-      const nextState = !isCurrentlyDown;
-      const updated = { ...prev, [hostId]: nextState };
-      
-      const host = hostnames.find((h) => h.id === hostId);
-      const fqdn = host ? host.fullHostname : hostId;
+    const isCurrentlyDown = Boolean(simulatedOutages[hostId]);
+    const nextState = !isCurrentlyDown;
+    setSimulatedOutages((prev) => ({ ...prev, [hostId]: nextState }));
 
-      if (nextState) {
-        setStatusNotification(`⚠️ Outage Simulated for ${fqdn}: Hostname marked Unreachable (Red).`);
-      } else {
-        setStatusNotification(`✓ Restored reachability for ${fqdn}: Status returning to Reachable (Green).`);
-      }
-      setTimeout(() => setStatusNotification(null), 4000);
+    const host = hostnamesRef.current.find((h) => h.id === hostId);
+    const fqdn = host ? host.fullHostname : hostId;
 
-      // Trigger immediate probe on this host to update status indicator
-      setTimeout(() => {
-        if (host) probeSingleHostname(host);
-      }, 100);
+    if (nextState) {
+      setStatusNotification(`⚠️ Outage Simulated for ${fqdn}: Hostname marked Unreachable (Red).`);
+    } else {
+      setStatusNotification(`✓ Restored reachability for ${fqdn}: Status returning to Reachable (Green).`);
+    }
+    setTimeout(() => setStatusNotification(null), 4000);
 
-      return updated;
-    });
+    // Trigger immediate probe on this host to update status indicator
+    setTimeout(() => {
+      if (host) probeSingleHostnameRef.current(host);
+    }, 100);
   };
 
   const handleTriggerTestEmail = useCallback((customEmail?: string) => {
@@ -680,11 +694,11 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
   const triggerRefresh = useCallback(async (isManual = false) => {
     setIsRefreshing(true);
     try {
-      if (onRefreshAllHostnames) {
-        await onRefreshAllHostnames();
+      if (onRefreshAllHostnamesRef.current) {
+        await onRefreshAllHostnamesRef.current();
       } else {
-        for (const h of hostnames) {
-          onRefreshHostname(h.id);
+        for (const h of hostnamesRef.current) {
+          onRefreshHostnameRef.current?.(h.id);
         }
       }
       const now = new Date();
@@ -693,7 +707,7 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
       setStatusNotification(isManual ? 'Manual refresh complete. DNS status updated.' : 'Auto-refreshed DNS status for all hostnames.');
       setTimeout(() => setStatusNotification(null), 3500);
       // Run quick heartbeat check along with DNS refresh
-      probeAllHostnames(false);
+      probeAllHostnamesRef.current?.(false);
     } catch (e) {
       console.error('Error refreshing hostnames:', e);
     } finally {
@@ -701,7 +715,10 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
         setIsRefreshing(false);
       }, 500);
     }
-  }, [onRefreshAllHostnames, onRefreshHostname, hostnames, probeAllHostnames]);
+  }, []);
+
+  const triggerRefreshRef = useRef(triggerRefresh);
+  triggerRefreshRef.current = triggerRefresh;
 
   // Auto-Refresh 60-second timer
   useEffect(() => {
@@ -714,14 +731,14 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
 
     // Periodic refresh interval (60s)
     const refreshTimer = setInterval(() => {
-      triggerRefresh(false);
+      triggerRefreshRef.current?.(false);
     }, 60000);
 
     return () => {
       clearInterval(countdownTimer);
       clearInterval(refreshTimer);
     };
-  }, [autoRefresh, triggerRefresh]);
+  }, [autoRefresh]);
 
   const handleToggleAutoRefresh = () => {
     const next = !autoRefresh;

@@ -15,6 +15,7 @@ import { NetworkStatus } from './components/NetworkStatus';
 import { DualCtaSection } from './components/DualCtaSection';
 import { WhyChooseNoIp } from './components/WhyChooseNoIp';
 import { PartnersResellers } from './components/PartnersResellers';
+import { CoreBankingLedgerSimulator } from './components/CoreBankingLedgerSimulator';
 import { NewsKnowledge } from './components/NewsKnowledge';
 import { UncomplicatedConnectivity } from './components/UncomplicatedConnectivity';
 import { Footer } from './components/Footer';
@@ -60,8 +61,10 @@ function NoIpApp() {
   const [dnsLookupInitialDomain, setDnsLookupInitialDomain] = useState<string | undefined>(undefined);
 
   const handleOpenDnsLookup = useCallback((domain?: string) => {
-    setDnsLookupInitialDomain(domain);
-    setIsDnsLookupOpen(true);
+    setTimeout(() => {
+      setDnsLookupInitialDomain(domain);
+      setIsDnsLookupOpen(true);
+    }, 0);
   }, []);
 
   // Cart state
@@ -117,8 +120,23 @@ function NoIpApp() {
   }, [updateAllHostnamesIp, showToast]);
 
   const handleOpenPortChecker = useCallback((port?: number, host?: string) => {
-    setPortCheckerPrefill({ port, host });
-    setIsPortCheckerOpen(true);
+    setTimeout(() => {
+      setPortCheckerPrefill({ port, host });
+      setIsPortCheckerOpen(true);
+    }, 0);
+  }, []);
+
+  const handleOpenDucSimulator = useCallback(() => {
+    setTimeout(() => setIsDucSimulatorOpen(true), 0);
+  }, []);
+  const handleOpenAuthModal = useCallback(() => {
+    setTimeout(() => setIsAuthModalOpen(true), 0);
+  }, []);
+  const handleOpenDomainSearch = useCallback(() => {
+    setTimeout(() => setIsDomainSearchOpen(true), 0);
+  }, []);
+  const handleOpenCart = useCallback(() => {
+    setTimeout(() => setIsCartOpen(true), 0);
   }, []);
 
   const handleApplyPromoCode = (code: string) => {
@@ -171,21 +189,21 @@ function NoIpApp() {
       {/* Top Special Offer Banner */}
       <PromoBanner
         onUpgradeClick={() => {
-          setIsCartOpen(true);
+          handleOpenCart();
           handleApplyPromoCode('SEP25OFF');
         }}
       />
 
       {/* Main Navigation Header */}
       <Navbar
-        onOpenPortChecker={() => handleOpenPortChecker()}
-        onOpenDucSimulator={() => setIsDucSimulatorOpen(true)}
+        onOpenPortChecker={handleOpenPortChecker}
+        onOpenDucSimulator={handleOpenDucSimulator}
         onSelectAudience={(aud) => setActiveAudience(aud)}
         cartCount={cartItems.length}
-        onOpenCart={() => setIsCartOpen(true)}
+        onOpenCart={handleOpenCart}
         userEmail={displayEmail}
         activeHostnamesCount={hostnames.length}
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onOpenAuthModal={handleOpenAuthModal}
         isAnonymous={isAnonymousUser}
         onOpenDnsLookup={handleOpenDnsLookup}
       />
@@ -197,7 +215,7 @@ function NoIpApp() {
           currentIp={currentIp}
           onAddHostname={handleAddHostname}
           onOpenPortChecker={handleOpenPortChecker}
-          onOpenDomainSearch={() => setIsDomainSearchOpen(true)}
+          onOpenDomainSearch={handleOpenDomainSearch}
           onOpenDnsLookup={handleOpenDnsLookup}
         />
 
@@ -211,9 +229,9 @@ function NoIpApp() {
           onRefreshHostname={handleRefreshHostname}
           onRefreshAllHostnames={handleRefreshAllHostnames}
           onOpenPortChecker={handleOpenPortChecker}
-          onOpenDucSimulator={() => setIsDucSimulatorOpen(true)}
+          onOpenDucSimulator={handleOpenDucSimulator}
           isCloudSynced={isCloudSynced}
-          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onOpenAuthModal={handleOpenAuthModal}
           userEmail={displayEmail}
           onOpenDnsLookup={handleOpenDnsLookup}
         />
@@ -222,7 +240,7 @@ function NoIpApp() {
         <CustomerUseCases
           activeAudience={activeAudience}
           setActiveAudience={setActiveAudience}
-          onOpenPortChecker={() => handleOpenPortChecker()}
+          onOpenPortChecker={handleOpenPortChecker}
         />
 
         {/* What is DDNS? and What is Managed DNS? Educational Visualizers */}
@@ -247,7 +265,7 @@ function NoIpApp() {
 
         {/* Why Choose No-IP as Your DNS Provider? */}
         <WhyChooseNoIp
-          onOpenPortChecker={() => handleOpenPortChecker()}
+          onOpenPortChecker={handleOpenPortChecker}
           onOpenKnowledgeBase={() => {
             const el = document.getElementById('resources-section');
             el?.scrollIntoView({ behavior: 'smooth' });
@@ -257,10 +275,17 @@ function NoIpApp() {
         {/* Partners & Resellers with Live API Simulator */}
         <PartnersResellers />
 
+        {/* Core Banking Mock Ledger & In-House Webhook Dispatcher Studio */}
+        <section className="py-16 bg-slate-950 border-t border-b border-slate-800 text-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <CoreBankingLedgerSimulator />
+          </div>
+        </section>
+
         {/* No-IP News & Knowledge Articles & DNS Security Best Practices */}
         <NewsKnowledge
           onOpenDnsLookup={handleOpenDnsLookup}
-          onOpenPortChecker={(port, host) => handleOpenPortChecker(port, host)}
+          onOpenPortChecker={handleOpenPortChecker}
         />
 
         {/* Welcome to Uncomplicated Connectivity Closing Hero */}
@@ -269,8 +294,8 @@ function NoIpApp() {
 
       {/* Complete Authentic Footer */}
       <Footer
-        onOpenPortChecker={() => handleOpenPortChecker()}
-        onOpenDucSimulator={() => setIsDucSimulatorOpen(true)}
+        onOpenPortChecker={handleOpenPortChecker}
+        onOpenDucSimulator={handleOpenDucSimulator}
         onSelectAudience={(aud) => {
           setActiveAudience(aud);
           const el = document.getElementById('how-customers-use-section');

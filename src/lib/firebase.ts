@@ -11,12 +11,13 @@ export const auth = getAuth(app);
 
 // Firestore instance targeting the provisioned database ID with robust connection settings
 const dbInstance = (() => {
+  const dbId = firebaseConfig.firestoreDatabaseId || '(default)';
   try {
     return initializeFirestore(app, {
-      experimentalAutoDetectLongPolling: true,
-    }, firebaseConfig.firestoreDatabaseId || '(default)');
+      experimentalForceLongPolling: true,
+    }, dbId);
   } catch {
-    return getFirestore(app, firebaseConfig.firestoreDatabaseId || '(default)');
+    return getFirestore(app, dbId);
   }
 })();
 

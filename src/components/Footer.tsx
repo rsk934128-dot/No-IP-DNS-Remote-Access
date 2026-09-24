@@ -48,6 +48,7 @@ export const Footer: React.FC<FooterProps> = ({
   ];
 
   const resourcesLinks = [
+    { label: 'Core Banking Ledger API', href: '#core-banking-ledger-studio', highlight: true },
     { label: 'Integrate via API', href: '#integrate-via-api', highlight: true },
     { label: 'API Documents', href: '#integrate-via-api' },
     { label: 'Real Public DNS Lookup', action: () => onOpenDnsLookup?.(), highlight: true },

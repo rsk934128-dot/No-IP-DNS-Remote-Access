@@ -22,7 +22,8 @@ import {
   Moon,
   Cloud,
   Search,
-  ShieldAlert
+  ShieldAlert,
+  Building2
 } from 'lucide-react';
 import { NoIpLogo } from './NoIpLogo';
 import { useTheme } from '../context/ThemeContext';
@@ -113,6 +114,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               <Search className="w-3.5 h-3.5 text-[#ff6600]" />
               <span>DNS Lookup</span>
               <span className="text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/30">Live</span>
+            </button>
+            <span className="text-slate-300 dark:text-slate-700">|</span>
+            <button
+              id="topbar-core-banking-btn"
+              type="button"
+              onClick={() => {
+                document.getElementById('core-banking-ledger-studio')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer font-medium"
+              title="Open In-House Core Banking Mock Ledger & Webhook Dispatcher"
+            >
+              <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Core Banking API</span>
+              <span className="text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/30">Ledger</span>
             </button>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <span className="text-slate-500 dark:text-slate-400">Need help? Call +1 775-853-1883</span>

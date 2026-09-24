@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   collection,
   doc,
@@ -57,22 +57,38 @@ export function useHostnames(currentIp: string) {
   const [loading, setLoading] = useState<boolean>(true);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
   const [syncError, setSyncError] = useState<string | null>(null);
+  const isSeedingRef = useRef<boolean>(false);
 
   // Firestore real-time listener for current user's hostnames
   useEffect(() => {
+    let isCancelled = false;
+
     if (!user) {
       // If not authenticated, load from localStorage if available
       try {
         const local = localStorage.getItem('noip_hostnames');
         if (local) {
-          setHostnames(JSON.parse(local));
+          const parsed = JSON.parse(local);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            setTimeout(() => {
+              if (!isCancelled) {
+                setHostnames(parsed);
+              }
+            }, 0);
+          }
         }
       } catch (e) {
         console.warn('Could not read local hostnames:', e);
       }
-      setLoading(false);
-      setIsCloudSynced(false);
-      return;
+      setTimeout(() => {
+        if (!isCancelled) {
+          setLoading(false);
+          setIsCloudSynced(false);
+        }
+      }, 0);
+      return () => {
+        isCancelled = true;
+      };
     }
 
     const hostnamesRef = collection(db, 'users', user.uid, 'hostnames');
@@ -80,55 +96,86 @@ export function useHostnames(currentIp: string) {
 
     const unsubscribe = onSnapshot(
       q,
-      async (snapshot) => {
+      (snapshot) => {
+        if (isCancelled) return;
+
         if (snapshot.empty) {
-          // First-time user: seed initial demo hostnames into Firestore
-          try {
-            for (const item of DEFAULT_SEED_HOSTNAMES) {
-              const docRef = doc(db, 'users', user.uid, 'hostnames', item.id);
-              await setDoc(docRef, {
-                ...item,
-                targetIp: currentIp || item.targetIp,
-                createdAt: serverTimestamp(),
-                updatedAt: serverTimestamp(),
-              });
-            }
-          } catch (seedErr) {
-            console.warn('Could not seed initial hostnames:', seedErr);
+          // First-time user: seed initial demo hostnames into Firestore in background without synchronous recursion
+          if (!isSeedingRef.current) {
+            isSeedingRef.current = true;
+            (async () => {
+              try {
+                for (const item of DEFAULT_SEED_HOSTNAMES) {
+                  const docRef = doc(db, 'users', user.uid, 'hostnames', item.id);
+                  await setDoc(docRef, {
+                    ...item,
+                    targetIp: currentIp || item.targetIp,
+                    createdAt: serverTimestamp(),
+                    updatedAt: serverTimestamp(),
+                  });
+                }
+              } catch (seedErr) {
+                console.warn('Could not seed initial hostnames:', seedErr);
+              } finally {
+                isSeedingRef.current = false;
+              }
+            })();
           }
-          setHostnames(DEFAULT_SEED_HOSTNAMES);
-        } else {
-          const list: HostnameRecord[] = [];
-          snapshot.forEach((docSnap) => {
-            const data = docSnap.data();
-            list.push({
-              id: docSnap.id,
-              name: data.name || '',
-              domain: data.domain || '.ddns.net',
-              fullHostname: data.fullHostname || `${data.name}${data.domain}`,
-              targetIp: data.targetIp || '',
-              targetIpv6: data.targetIpv6 || '',
-              recordType: data.recordType || (data.targetIpv6 ? (data.targetIp ? 'DUAL' : 'AAAA') : 'A'),
-              lastUpdated: data.lastUpdated || 'Just now',
-              status: data.status || 'Active',
-              port: data.port || 80,
-            });
-          });
-          setHostnames(list);
+
+          setTimeout(() => {
+            if (!isCancelled) {
+              setHostnames(DEFAULT_SEED_HOSTNAMES);
+              setLoading(false);
+              setIsCloudSynced(true);
+              setSyncError(null);
+            }
+          }, 0);
+          return;
         }
-        setLoading(false);
-        setIsCloudSynced(true);
-        setSyncError(null);
+
+        const list: HostnameRecord[] = [];
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          list.push({
+            id: docSnap.id,
+            name: data.name || '',
+            domain: data.domain || '.ddns.net',
+            fullHostname: data.fullHostname || `${data.name}${data.domain}`,
+            targetIp: data.targetIp || '',
+            targetIpv6: data.targetIpv6 || '',
+            recordType: data.recordType || (data.targetIpv6 ? (data.targetIp ? 'DUAL' : 'AAAA') : 'A'),
+            lastUpdated: data.lastUpdated || 'Just now',
+            status: data.status || 'Active',
+            port: data.port || 80,
+          });
+        });
+
+        setTimeout(() => {
+          if (!isCancelled) {
+            setHostnames(list);
+            setLoading(false);
+            setIsCloudSynced(true);
+            setSyncError(null);
+          }
+        }, 0);
       },
       (err) => {
-        console.error('Firestore onSnapshot error:', err);
-        setSyncError(err.message);
-        setIsCloudSynced(false);
-        setLoading(false);
+        if (isCancelled) return;
+        console.warn('Firestore onSnapshot notice:', err.message);
+        setTimeout(() => {
+          if (!isCancelled) {
+            setSyncError(err.message);
+            setIsCloudSynced(false);
+            setLoading(false);
+          }
+        }, 0);
       }
     );
 
-    return () => unsubscribe();
+    return () => {
+      isCancelled = true;
+      unsubscribe();
+    };
   }, [user, currentIp]);
 
   // Add Hostname to Firestore
