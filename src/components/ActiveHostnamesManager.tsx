@@ -68,7 +68,7 @@ const DOMAIN_OPTIONS = [
   '.servegame.com'
 ];
 
-export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
+export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = React.memo(({
   hostnames,
   currentIp = '198.51.100.42',
   onAddHostname,
@@ -1191,7 +1191,7 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
             {onOpenAuthModal && (
               <button
                 type="button"
-                onClick={onOpenAuthModal}
+                onClick={() => onOpenAuthModal()}
                 className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors cursor-pointer border border-slate-200 dark:border-slate-700"
               >
                 <Cloud className="w-3.5 h-3.5 text-slate-500" />
@@ -1201,7 +1201,7 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
 
             <button
               type="button"
-              onClick={onOpenDucSimulator}
+              onClick={() => onOpenDucSimulator()}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-orange-50 dark:bg-orange-950/40 hover:bg-orange-100 dark:hover:bg-orange-900/60 text-[#ff6600] dark:text-[#ff914d] border border-orange-200 dark:border-orange-800/60 text-xs font-semibold transition-colors cursor-pointer"
             >
               <RefreshCw className="w-3.5 h-3.5" />
@@ -2678,4 +2678,6 @@ export const ActiveHostnamesManager: React.FC<ActiveHostnamesManagerProps> = ({
       </div>
     </section>
   );
-};
+});
+
+ActiveHostnamesManager.displayName = 'ActiveHostnamesManager';

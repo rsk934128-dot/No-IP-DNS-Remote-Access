@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   Building2,
   Wallet,
@@ -28,7 +28,9 @@ import {
   Sliders,
   DollarSign,
   Undo2,
-  Search
+  Search,
+  ArrowRight,
+  Activity
 } from 'lucide-react';
 import { HttpEventLog } from '../types/ledgerEvents';
 import { WebhookEventLogViewer } from './WebhookEventLogViewer';
@@ -176,6 +178,66 @@ const INITIAL_LEDGER_ENTRIES: LedgerEntry[] = [
     description: 'Direct Account Inward Liquidity Top-up',
     metadata: {
       channel: 'CORE_LEDGER',
+      clientIp: '198.51.100.42',
+      otpVerified: true,
+      settlementSpeed: 'INSTANT_0s',
+    },
+  },
+  {
+    id: 'TXN-7739084',
+    timestamp: '2026-09-24T10:30:00Z',
+    txHash: '0x1a88f4c93021be0975aa991b5c43d88190eec219',
+    idempotencyKey: 'idemp_88301-44ac-99e1',
+    reference: 'INV-2026-0038',
+    type: 'PAYMENT_SETTLEMENT',
+    status: 'SETTLED',
+    debitAccount: 'ACC-882109',
+    creditAccount: 'ACC-990014',
+    amount: 85.5,
+    currency: 'USD',
+    description: 'Dynamic DNS Pro Renewal & Custom Anycast Routing',
+    metadata: {
+      channel: 'IN_HOUSE_API',
+      clientIp: '198.51.100.42',
+      otpVerified: true,
+      settlementSpeed: 'INSTANT_0s',
+    },
+  },
+  {
+    id: 'TXN-7739071',
+    timestamp: '2026-09-24T08:50:20Z',
+    txHash: '0x992cf8810239abbc4510091aa44598d102eef5a1',
+    idempotencyKey: 'idemp_55102-18da-439f',
+    reference: 'SETTLE-99014',
+    type: 'TRANSFER',
+    status: 'SETTLED',
+    debitAccount: 'ACC-990014',
+    creditAccount: 'ACC-001000',
+    amount: 450.0,
+    currency: 'USD',
+    description: 'Merchant Settlement Vault Reserve Liquidity Allocation',
+    metadata: {
+      channel: 'CORE_LEDGER',
+      clientIp: '198.51.100.42',
+      otpVerified: true,
+      settlementSpeed: 'INSTANT_0s',
+    },
+  },
+  {
+    id: 'TXN-7739055',
+    timestamp: '2026-09-24T06:12:10Z',
+    txHash: '0x3344ea102948bb81002938481029348571829304',
+    idempotencyKey: 'idemp_22910-99fe-11aa',
+    reference: 'INV-2026-0029',
+    type: 'PAYMENT_SETTLEMENT',
+    status: 'SETTLED',
+    debitAccount: 'ACC-882109',
+    creditAccount: 'ACC-990014',
+    amount: 120.0,
+    currency: 'USD',
+    description: 'Wildcard SSL Certificate Direct Banking Bridge Settlement',
+    metadata: {
+      channel: 'IN_HOUSE_API',
       clientIp: '198.51.100.42',
       otpVerified: true,
       settlementSpeed: 'INSTANT_0s',
@@ -408,6 +470,24 @@ export const CoreBankingLedgerSimulator: React.FC = () => {
   const [selectedEndpoint, setSelectedEndpoint] = useState<'transfers' | 'verifyOtp' | 'balance' | 'reversal'>('transfers');
   const [apiResponsePreview, setApiResponsePreview] = useState<string | null>(null);
   const [webhookSearchFilter, setWebhookSearchFilter] = useState<string>('');
+  const [showFlowSummaryInLedger, setShowFlowSummaryInLedger] = useState<boolean>(true);
+
+  // Last 5 successful ledger transactions for Core Banking flow summary
+  const recentSuccessfulTransactions = useMemo(() => {
+    return ledgerEntries
+      .filter((entry) => entry.status === 'SETTLED')
+      .slice(0, 5);
+  }, [ledgerEntries]);
+
+  // Total transferred volume across the last 5 successful transactions
+  const recentSuccessfulVolume = useMemo(() => {
+    return recentSuccessfulTransactions.reduce((acc, t) => acc + t.amount, 0);
+  }, [recentSuccessfulTransactions]);
+
+  const getAccountByNumber = useCallback(
+    (accountNum: string) => accounts.find((a) => a.accountNumber === accountNum),
+    [accounts]
+  );
 
   const notify = (text: string, type: 'success' | 'error' | 'info' = 'success') => {
     setFeedbackNotice({ type, text });
@@ -1108,6 +1188,253 @@ export const CoreBankingLedgerSimulator: React.FC = () => {
     notify('✓ Exported ledger statement as JSON.', 'success');
   };
 
+  // Listen for commands dispatched from BankingToolsSidebar
+  useEffect(() => {
+    const handleBankingCommand = (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        action: 'switch_tab' | 'export_csv' | 'export_json';
+        tab?: 'console' | 'ledger' | 'webhooks' | 'code';
+      }>;
+      if (customEvent.detail?.action === 'switch_tab' && customEvent.detail.tab) {
+        setActiveTab(customEvent.detail.tab);
+      } else if (customEvent.detail?.action === 'export_csv') {
+        handleExportLedgerCsv();
+      } else if (customEvent.detail?.action === 'export_json') {
+        handleExportLedgerJson();
+      }
+    };
+    window.addEventListener('core-banking-action', handleBankingCommand);
+    return () => window.removeEventListener('core-banking-action', handleBankingCommand);
+  }, [ledgerEntries, accounts]);
+
+  // Core Banking Flow Summary View: Last 5 successful ledger transactions
+  const renderCoreBankingFlowSummary = (embeddedLocation: 'sandbox' | 'ledger' = 'sandbox') => {
+    return (
+      <div className="rounded-3xl border border-slate-800 bg-slate-950/85 p-5 sm:p-7 shadow-2xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800/80">
+          <div className="space-y-1">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+              <span>Core Banking Flow Telemetry</span>
+              <span className="text-slate-500">•</span>
+              <span>Last 5 Successful Settlements</span>
+            </div>
+            <h3 className="text-lg sm:text-xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+              <Building2 className="w-5 h-5 text-emerald-400" />
+              <span>Core Banking Flow Summary: Last 5 Successful Transactions</span>
+            </h3>
+            <p className="text-xs text-slate-400 max-w-2xl leading-relaxed">
+              Real-time summary of atomic transfers executed across internal bank accounts: visualizing timestamp, debtor (sender), creditor (receiver), and transferred amount with 0% gateway commission.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="bg-slate-900 border border-slate-800 px-3.5 py-2 rounded-2xl text-right">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">5-Tx Settled Volume</span>
+              <span className="text-sm font-mono font-extrabold text-emerald-400">
+                ${recentSuccessfulVolume.toLocaleString(undefined, { minimumFractionDigits: 2 })} USD
+              </span>
+            </div>
+
+            {embeddedLocation === 'sandbox' ? (
+              <button
+                type="button"
+                onClick={() => setActiveTab('ledger')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 cursor-pointer transition-all"
+              >
+                <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Full Ledger ({ledgerEntries.length})</span>
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setActiveTab('webhooks')}
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-slate-800 hover:bg-slate-700 text-xs font-bold text-slate-200 border border-slate-700 cursor-pointer transition-all"
+              >
+                <Radio className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Webhook Log ({httpLogs.length})</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Transaction Flow List */}
+        {recentSuccessfulTransactions.length === 0 ? (
+          <div className="p-8 rounded-2xl bg-slate-900/50 border border-slate-800 text-center space-y-2">
+            <Clock className="w-6 h-6 text-slate-600 mx-auto" />
+            <p className="text-xs text-slate-400 font-semibold">No successful ledger settlements recorded yet.</p>
+            <p className="text-[11px] text-slate-500">Run a simulated payment in the sandbox above to observe live core banking settlements.</p>
+          </div>
+        ) : (
+          <div className="space-y-3.5">
+            {recentSuccessfulTransactions.map((tx, idx) => {
+              const sender = getAccountByNumber(tx.debitAccount);
+              const receiver = getAccountByNumber(tx.creditAccount);
+
+              return (
+                <div
+                  key={tx.id}
+                  className="p-4 sm:p-5 rounded-2xl border border-slate-800/90 bg-slate-900/60 hover:bg-slate-900 hover:border-slate-700 transition-all duration-150 space-y-3.5 group"
+                >
+                  {/* Top Meta Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs border-b border-slate-800/60 pb-2.5">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="w-5 h-5 rounded-lg bg-slate-800 text-[10px] font-bold font-mono text-slate-300 flex items-center justify-center">
+                        #{idx + 1}
+                      </span>
+
+                      <span className="text-[11px] font-mono font-bold text-white flex items-center gap-1">
+                        <span>{tx.id}</span>
+                      </span>
+
+                      <span className="text-[10px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                        Ref: {tx.reference}
+                      </span>
+
+                      <span className="px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                        {tx.type}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] text-slate-400 flex items-center gap-1 font-sans" title={tx.timestamp}>
+                        <Clock className="w-3.5 h-3.5 text-slate-500" />
+                        <span>{new Date(tx.timestamp).toLocaleString([], { dateStyle: 'short', timeStyle: 'medium' })}</span>
+                      </span>
+
+                      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                        <Check className="w-3 h-3" />
+                        <span>SETTLED (0s Instant)</span>
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Flow Visualization: Sender ──► Receiver */}
+                  <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    {/* SENDER (DEBTOR) */}
+                    <div className="md:col-span-4 p-3.5 rounded-xl bg-slate-950/80 border border-rose-900/30 hover:border-rose-700/50 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-rose-400 bg-rose-500/10 px-2 py-0.5 rounded-md">
+                          <span>Sender (Debtor)</span>
+                        </span>
+                        <span className="text-[11px] font-mono text-rose-400 font-bold">
+                          -${tx.amount.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="font-mono text-xs font-bold text-white block">
+                          {tx.debitAccount}
+                        </span>
+                        <span className="text-[11px] text-slate-300 font-medium block truncate" title={sender?.accountName || tx.debitAccount}>
+                          {sender?.accountName || 'Customer Checking'}
+                        </span>
+                      </div>
+
+                      <span className="text-[9px] font-bold text-slate-500 block uppercase">
+                        {sender?.type?.replace('_', ' ') || 'INTERNAL LEDGER'}
+                      </span>
+                    </div>
+
+                    {/* FLOW CONDUIT (CENTER ARROW & INFO) */}
+                    <div className="md:col-span-4 flex flex-col items-center justify-center text-center px-2 py-1 space-y-1">
+                      <div className="flex items-center gap-1.5 text-[10px] font-bold font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                        <ArrowRightLeft className="w-3 h-3 text-emerald-400" />
+                        <span>Direct Core Settlement</span>
+                      </div>
+
+                      <div className="w-full flex items-center justify-center gap-1 text-slate-600">
+                        <div className="h-0.5 flex-1 bg-gradient-to-r from-rose-500/40 via-emerald-500/40 to-emerald-500/70 rounded"></div>
+                        <ArrowRight className="w-4 h-4 text-emerald-400 shrink-0" />
+                      </div>
+
+                      <span className="text-[10px] text-slate-400 truncate max-w-xs block font-sans" title={tx.description}>
+                        {tx.description}
+                      </span>
+                    </div>
+
+                    {/* RECEIVER (CREDITOR) */}
+                    <div className="md:col-span-4 p-3.5 rounded-xl bg-slate-950/80 border border-emerald-900/30 hover:border-emerald-700/50 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase tracking-wider text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                          <span>Receiver (Creditor)</span>
+                        </span>
+                        <span className="text-[11px] font-mono text-emerald-400 font-bold">
+                          +${tx.amount.toFixed(2)}
+                        </span>
+                      </div>
+
+                      <div>
+                        <span className="font-mono text-xs font-bold text-white block">
+                          {tx.creditAccount}
+                        </span>
+                        <span className="text-[11px] text-slate-300 font-medium block truncate" title={receiver?.accountName || tx.creditAccount}>
+                          {receiver?.accountName || 'Merchant Settlement Vault'}
+                        </span>
+                      </div>
+
+                      <span className="text-[9px] font-bold text-slate-500 block uppercase">
+                        {receiver?.type?.replace('_', ' ') || 'SETTLEMENT VAULT'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bottom Details Row */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-800/60 text-xs">
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-baseline gap-1.5 font-mono">
+                        <span className="text-xs text-slate-400">Amount Transferred:</span>
+                        <span className="text-base font-extrabold text-emerald-400">
+                          ${tx.amount.toFixed(2)}
+                        </span>
+                        <span className="text-[10px] text-slate-400 font-sans">{tx.currency}</span>
+                      </div>
+
+                      <span className="text-slate-700">|</span>
+
+                      <span className="text-[10px] font-mono text-slate-400 truncate max-w-[200px]" title={tx.txHash}>
+                        Hash: {tx.txHash.slice(0, 18)}...
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => handleViewWebhookForTx(tx.reference || tx.id)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-700 cursor-pointer transition-all"
+                        title="View incoming HTTP POST and outgoing webhooks for this transaction"
+                      >
+                        <Radio className="w-3 h-3 text-emerald-400" />
+                        <span>View Webhook Log</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => copyText(tx.txHash, `hash-${tx.id}`)}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 text-[11px] font-semibold border border-slate-800 cursor-pointer"
+                        title="Copy cryptographic block hash"
+                      >
+                        {copiedId === `hash-${tx.id}` ? (
+                          <Check className="w-3 h-3 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-3 h-3" />
+                        )}
+                        <span>Copy Hash</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <div id="core-banking-ledger-studio" className="rounded-3xl border border-slate-800 bg-slate-900/90 text-slate-100 overflow-hidden shadow-2xl backdrop-blur-sm">
       {/* Top Banner Header */}
@@ -1525,6 +1852,27 @@ export const CoreBankingLedgerSimulator: React.FC = () => {
 
             {/* Right Architecture Card */}
             <div className="lg:col-span-5 bg-slate-950/80 border border-slate-800 rounded-3xl p-6 space-y-5">
+              {/* Architecture Visual Illustration Banner */}
+              <div className="relative aspect-[21/9] w-full rounded-2xl overflow-hidden border border-slate-800 bg-slate-900 group">
+                <img
+                  src="/src/assets/images/anycast_datacenter_1789920040526.jpg"
+                  alt="Direct Core Banking Architecture Infrastructure"
+                  className="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-500"
+                  referrerPolicy="no-referrer"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent" />
+                <div className="absolute bottom-2.5 left-3 right-3 flex items-center justify-between text-[11px]">
+                  <span className="font-bold text-white font-mono flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    Direct Bank API Bridge
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 text-[10px]">
+                    0% Gateway Intermediary Fee
+                  </span>
+                </div>
+              </div>
+
               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
                 <span>Why Direct Core Banking Integration?</span>
@@ -1634,6 +1982,9 @@ export const CoreBankingLedgerSimulator: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Core Banking Flow Summary View: Last 5 Successful Ledger Transactions */}
+          {renderCoreBankingFlowSummary('sandbox')}
         </div>
       )}
 
@@ -1651,7 +2002,20 @@ export const CoreBankingLedgerSimulator: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowFlowSummaryInLedger(!showFlowSummaryInLedger)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold cursor-pointer border transition-all ${
+                  showFlowSummaryInLedger
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border-slate-700'
+                }`}
+              >
+                <Activity className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{showFlowSummaryInLedger ? 'Hide Flow Summary' : 'Show Flow Summary (Last 5)'}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={handleExportLedgerCsv}
@@ -1671,6 +2035,9 @@ export const CoreBankingLedgerSimulator: React.FC = () => {
               </button>
             </div>
           </div>
+
+          {/* Embedded Core Banking Flow Summary in Ledger Tab */}
+          {showFlowSummaryInLedger && renderCoreBankingFlowSummary('ledger')}
 
           <div className="overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950">
             <table className="w-full text-left text-xs border-collapse">

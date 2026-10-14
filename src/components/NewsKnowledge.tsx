@@ -126,7 +126,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Cybersecurity',
       date: 'Updated 2026',
       readTime: '7 min read',
-      image: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/network_sysadmin_datacenter_1790353826300.jpg',
       excerpt: 'How attackers exploit legacy UDP port 53 to spoof domain resolutions, how the Kaminsky flaw forged responses, and why DNSSEC and encrypted DoH/DoT make poisoning mathematically impossible.',
     },
     {
@@ -135,7 +135,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Developer API',
       date: 'Updated 2026',
       readTime: '6 min read',
-      image: 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/ddns_network_flow_1789671667574.jpg',
       excerpt: 'Official specification for programmatic DNS updates via HTTP GET, RFC 7617 Basic Authentication, custom User-Agent policies, and return code reference matrices.',
     },
     {
@@ -144,7 +144,7 @@ export const NewsKnowledge: React.FC<NewsKnowledgeProps> = ({
       category: 'Router Guides',
       date: 'September 2026',
       readTime: '4 min read',
-      image: 'https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/smart_home_iot_1789920056637.jpg',
       excerpt: 'Most modern wireless routers have No-IP DDNS built right into the admin firmware. Follow this step-by-step walkthrough to configure automated IP synchronization in under 3 minutes.',
     },
     {

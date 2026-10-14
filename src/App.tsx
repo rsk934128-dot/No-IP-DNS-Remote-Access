@@ -4,10 +4,13 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { Building2 } from 'lucide-react';
 import { PromoBanner } from './components/PromoBanner';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { ActiveHostnamesManager } from './components/ActiveHostnamesManager';
+import { WifiRealtimeManager } from './components/WifiRealtimeManager';
+import { IntegrateViaApiSection } from './components/IntegrateViaApiSection';
 import { CustomerUseCases } from './components/CustomerUseCases';
 import { DnsExplainers } from './components/DnsExplainers';
 import { StatsSection } from './components/StatsSection';
@@ -25,6 +28,7 @@ import { CartModal } from './components/CartModal';
 import { DomainSearchModal } from './components/DomainSearchModal';
 import { AuthModal } from './components/AuthModal';
 import { DnsLookupModal } from './components/DnsLookupModal';
+import { BankingToolsSidebar } from './components/BankingToolsSidebar';
 import { HostnameRecord, CustomerAudience } from './types';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { useHostnames } from './hooks/useHostnames';
@@ -59,12 +63,11 @@ function NoIpApp() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isDnsLookupOpen, setIsDnsLookupOpen] = useState(false);
   const [dnsLookupInitialDomain, setDnsLookupInitialDomain] = useState<string | undefined>(undefined);
+  const [isBankingSidebarOpen, setIsBankingSidebarOpen] = useState(false);
 
   const handleOpenDnsLookup = useCallback((domain?: string) => {
-    setTimeout(() => {
-      setDnsLookupInitialDomain(domain);
-      setIsDnsLookupOpen(true);
-    }, 0);
+    setDnsLookupInitialDomain(domain);
+    setIsDnsLookupOpen(true);
   }, []);
 
   // Cart state
@@ -120,23 +123,21 @@ function NoIpApp() {
   }, [updateAllHostnamesIp, showToast]);
 
   const handleOpenPortChecker = useCallback((port?: number, host?: string) => {
-    setTimeout(() => {
-      setPortCheckerPrefill({ port, host });
-      setIsPortCheckerOpen(true);
-    }, 0);
+    setPortCheckerPrefill({ port, host });
+    setIsPortCheckerOpen(true);
   }, []);
 
   const handleOpenDucSimulator = useCallback(() => {
-    setTimeout(() => setIsDucSimulatorOpen(true), 0);
+    setIsDucSimulatorOpen(true);
   }, []);
   const handleOpenAuthModal = useCallback(() => {
-    setTimeout(() => setIsAuthModalOpen(true), 0);
+    setIsAuthModalOpen(true);
   }, []);
   const handleOpenDomainSearch = useCallback(() => {
-    setTimeout(() => setIsDomainSearchOpen(true), 0);
+    setIsDomainSearchOpen(true);
   }, []);
   const handleOpenCart = useCallback(() => {
-    setTimeout(() => setIsCartOpen(true), 0);
+    setIsCartOpen(true);
   }, []);
 
   const handleApplyPromoCode = (code: string) => {
@@ -206,6 +207,7 @@ function NoIpApp() {
         onOpenAuthModal={handleOpenAuthModal}
         isAnonymous={isAnonymousUser}
         onOpenDnsLookup={handleOpenDnsLookup}
+        onOpenBankingSidebar={() => setIsBankingSidebarOpen(true)}
       />
 
       {/* Main Content Areas */}
@@ -233,6 +235,14 @@ function NoIpApp() {
           isCloudSynced={isCloudSynced}
           onOpenAuthModal={handleOpenAuthModal}
           userEmail={displayEmail}
+          onOpenDnsLookup={handleOpenDnsLookup}
+        />
+
+        {/* Real-Time WiFi Airwave Scanner, Jam Clearer, IP Sharing & Subnet Expansion Engine */}
+        <WifiRealtimeManager
+          currentPublicIp={currentIp}
+          hostnames={hostnames}
+          onUpdateIp={handleSimulateIpUpdate}
           onOpenDnsLookup={handleOpenDnsLookup}
         />
 
@@ -274,6 +284,11 @@ function NoIpApp() {
 
         {/* Partners & Resellers with Live API Simulator */}
         <PartnersResellers />
+
+        {/* Dynamic DNS Programmatic API Integration & SDK Playground */}
+        <div id="integrate-via-api">
+          <IntegrateViaApiSection />
+        </div>
 
         {/* Core Banking Mock Ledger & In-House Webhook Dispatcher Studio */}
         <section className="py-16 bg-slate-950 border-t border-b border-slate-800 text-white">
@@ -357,6 +372,40 @@ function NoIpApp() {
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={(msg) => showToast(msg)}
       />
+
+      {/* Core Banking A-Z Programs & Tools Sidebar */}
+      <BankingToolsSidebar
+        isOpen={isBankingSidebarOpen}
+        onClose={() => setIsBankingSidebarOpen(false)}
+        onOpenPortChecker={handleOpenPortChecker}
+        onOpenDnsLookup={handleOpenDnsLookup}
+        onOpenDucSimulator={handleOpenDucSimulator}
+        onOpenDomainSearch={handleOpenDomainSearch}
+      />
+
+      {/* Floating Banking Tools Sidebar Trigger Tab (Always Accessible) */}
+      {!isBankingSidebarOpen && (
+        <button
+          id="floating-banking-sidebar-btn"
+          type="button"
+          onClick={() => setIsBankingSidebarOpen(true)}
+          className="fixed right-0 top-1/2 -translate-y-1/2 z-40 bg-gradient-to-l from-slate-900 to-slate-950 text-white border-l border-t border-b border-emerald-500/40 hover:border-emerald-400 rounded-l-2xl py-3 px-2 sm:px-2.5 shadow-2xl hover:bg-slate-800 transition-all cursor-pointer flex flex-col items-center gap-2 group hover:-translate-x-1"
+          title="Open Core Banking A-Z Programs Sidebar"
+          aria-label="Open Core Banking Programs Sidebar"
+        >
+          <div className="relative">
+            <Building2 className="w-5 h-5 text-emerald-400 group-hover:scale-110 transition-transform" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-[#ff6600] animate-ping"></span>
+          </div>
+          <span
+            className="text-[9px] font-black uppercase tracking-wider text-slate-300 group-hover:text-emerald-300 select-none py-1"
+            style={{ writingMode: 'vertical-rl' }}
+          >
+            BANKING A-Z
+          </span>
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+        </button>
+      )}
     </div>
   );
 }

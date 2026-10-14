@@ -67,7 +67,7 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'sysadmin',
       title: 'Perform System Administration',
       desc: 'Acquire and configure domains, manage DNS zones and corporate firewalls, and more with our full system admin suite.',
-      image: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/network_sysadmin_datacenter_1790353826300.jpg',
       icon: <Sliders className="w-5 h-5 text-[#ff6600]" />,
       tags: ['DNS Zones', 'Firewall Rules', 'API Automation'],
       fullDetails: {
@@ -85,7 +85,7 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'security-monitoring',
       title: 'Security and Alarm Monitoring',
       desc: 'Provide clients with reliable, secure remote access to their security cameras, alarms, and surveillance systems—anytime, anywhere.',
-      image: 'https://images.unsplash.com/photo-1557597774-9d273605dfa9?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/security_camera_nvr_1790353814405.jpg',
       icon: <Cctv className="w-5 h-5 text-emerald-600" />,
       tags: ['CCTV / NVR', 'Alarm Panels', 'White-Label DDNS'],
       fullDetails: {
@@ -106,7 +106,7 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'gaming-rdp',
       title: 'Remote Desktop & Gaming Servers',
       desc: 'Host your own Minecraft, Palworld, Valheim, or Discord bot servers, or access your high-performance home workstation from anywhere via Windows RDP or Parsec.',
-      image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/gaming_server_setup_1790353800213.jpg',
       icon: <Gamepad2 className="w-5 h-5 text-purple-600" />,
       tags: ['Minecraft 25565', 'Windows RDP 3389', 'Zero Lag'],
       fullDetails: {
@@ -124,7 +124,7 @@ export const CustomerUseCases: React.FC<CustomerUseCasesProps> = ({
       id: 'home-nas-cloud',
       title: 'Private Cloud & Media Servers (Plex / NAS)',
       desc: 'Stream your music, 4K movies, and sync personal photos securely to Synology, TrueNAS, unRAID, or Nextcloud without third-party subscription fees.',
-      image: 'https://images.unsplash.com/photo-1600132806370-bf17e65e942f?auto=format&fit=crop&w=800&q=80',
+      image: '/src/assets/images/nas_private_cloud_1790353839567.jpg',
       icon: <HardDrive className="w-5 h-5 text-blue-600" />,
       tags: ['Synology', 'Nextcloud', 'TrueNAS / unRAID'],
       fullDetails: {

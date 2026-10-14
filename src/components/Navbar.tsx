@@ -40,6 +40,7 @@ interface NavbarProps {
   onOpenAuthModal?: () => void;
   isAnonymous?: boolean;
   onOpenDnsLookup: (initialDomain?: string) => void;
+  onOpenBankingSidebar?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -53,6 +54,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenAuthModal,
   isAnonymous = false,
   onOpenDnsLookup,
+  onOpenBankingSidebar,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -120,14 +122,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="topbar-core-banking-btn"
               type="button"
               onClick={() => {
-                document.getElementById('core-banking-ledger-studio')?.scrollIntoView({ behavior: 'smooth' });
+                if (onOpenBankingSidebar) {
+                  onOpenBankingSidebar();
+                } else {
+                  document.getElementById('core-banking-ledger-studio')?.scrollIntoView({ behavior: 'smooth' });
+                }
               }}
               className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer font-medium"
-              title="Open In-House Core Banking Mock Ledger & Webhook Dispatcher"
+              title="Open In-House Core Banking A-Z Tools Sidebar & Mock Ledger"
             >
               <Building2 className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Core Banking API</span>
-              <span className="text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/30">Ledger</span>
+              <span>Banking Tools (A-Z)</span>
+              <span className="text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold px-1.5 py-0.2 rounded border border-emerald-500/30">Sidebar</span>
             </button>
             <span className="text-slate-300 dark:text-slate-700">|</span>
             <span className="text-slate-500 dark:text-slate-400">Need help? Call +1 775-853-1883</span>
@@ -527,6 +533,31 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
 
             <a
+              href="#wifi-mesh-manager"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('wifi-mesh-manager')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-[#ff6600] dark:hover:text-[#ff914d] transition-colors py-2 flex items-center gap-1.5"
+            >
+              <Wifi className="w-3.5 h-3.5 text-emerald-500" />
+              <span>WiFi & Mesh</span>
+              <span className="text-[9px] bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-bold px-1 py-0.2 rounded">Live</span>
+            </a>
+
+            <a
+              href="#integrate-via-api"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('integrate-via-api')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="hover:text-[#ff6600] dark:hover:text-[#ff914d] transition-colors py-2 flex items-center gap-1"
+            >
+              <Code2 className="w-3.5 h-3.5 text-sky-500" />
+              <span>API</span>
+            </a>
+
+            <a
               href="#partners-resellers-section"
               onClick={(e) => {
                 e.preventDefault();
@@ -587,6 +618,20 @@ export const Navbar: React.FC<NavbarProps> = ({
               </>
             )}
           </button>
+
+          {onOpenBankingSidebar && (
+            <button
+              id="nav-banking-tools-btn"
+              type="button"
+              onClick={onOpenBankingSidebar}
+              className="text-xs font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-2 rounded-lg transition-all flex items-center gap-1.5 cursor-pointer border border-emerald-500/30 hover:border-emerald-500/50 shadow-xs"
+              title="Open Core Banking A-Z Tools Sidebar"
+            >
+              <Building2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Banking (A-Z)</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            </button>
+          )}
 
           <button
             id="nav-open-port-checker-btn"
@@ -688,6 +733,23 @@ export const Navbar: React.FC<NavbarProps> = ({
           </div>
 
           <div className="space-y-1 text-sm font-medium text-slate-800 dark:text-slate-200">
+            {onOpenBankingSidebar && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onOpenBankingSidebar();
+                }}
+                className="w-full text-left py-2.5 px-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-300/80 dark:border-emerald-700/80 text-emerald-800 dark:text-emerald-300 font-bold flex items-center justify-between transition-colors cursor-pointer shadow-xs mb-2"
+              >
+                <span className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-emerald-500" />
+                  <span>Core Banking Programs (A-Z Sidebar)</span>
+                </span>
+                <span className="text-[10px] bg-emerald-600 text-white font-mono px-2 py-0.5 rounded-full font-extrabold">15+ Tools</span>
+              </button>
+            )}
+
             <button
               onClick={() => {
                 setMobileMenuOpen(false);

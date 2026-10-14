@@ -53,7 +53,21 @@ const DEFAULT_SEED_HOSTNAMES: HostnameRecord[] = [
 
 export function useHostnames(currentIp: string) {
   const { user } = useAuth();
-  const [hostnames, setHostnames] = useState<HostnameRecord[]>(DEFAULT_SEED_HOSTNAMES);
+
+  // Initialize directly from localStorage if present to avoid initial render shift
+  const [hostnames, setHostnames] = useState<HostnameRecord[]>(() => {
+    try {
+      const local = typeof window !== 'undefined' ? localStorage.getItem('noip_hostnames') : null;
+      if (local) {
+        const parsed = JSON.parse(local);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {}
+    return DEFAULT_SEED_HOSTNAMES;
+  });
+
   const [loading, setLoading] = useState<boolean>(true);
   const [isCloudSynced, setIsCloudSynced] = useState<boolean>(false);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -64,28 +78,8 @@ export function useHostnames(currentIp: string) {
     let isCancelled = false;
 
     if (!user) {
-      // If not authenticated, load from localStorage if available
-      try {
-        const local = localStorage.getItem('noip_hostnames');
-        if (local) {
-          const parsed = JSON.parse(local);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            setTimeout(() => {
-              if (!isCancelled) {
-                setHostnames(parsed);
-              }
-            }, 0);
-          }
-        }
-      } catch (e) {
-        console.warn('Could not read local hostnames:', e);
-      }
-      setTimeout(() => {
-        if (!isCancelled) {
-          setLoading(false);
-          setIsCloudSynced(false);
-        }
-      }, 0);
+      setLoading(false);
+      setIsCloudSynced(false);
       return () => {
         isCancelled = true;
       };
@@ -100,7 +94,7 @@ export function useHostnames(currentIp: string) {
         if (isCancelled) return;
 
         if (snapshot.empty) {
-          // First-time user: seed initial demo hostnames into Firestore in background without synchronous recursion
+          // First-time user: seed initial demo hostnames into Firestore in background
           if (!isSeedingRef.current) {
             isSeedingRef.current = true;
             (async () => {
@@ -122,14 +116,12 @@ export function useHostnames(currentIp: string) {
             })();
           }
 
-          setTimeout(() => {
-            if (!isCancelled) {
-              setHostnames(DEFAULT_SEED_HOSTNAMES);
-              setLoading(false);
-              setIsCloudSynced(true);
-              setSyncError(null);
-            }
-          }, 0);
+          if (!isCancelled) {
+            setHostnames(DEFAULT_SEED_HOSTNAMES);
+            setLoading(false);
+            setIsCloudSynced(true);
+            setSyncError(null);
+          }
           return;
         }
 
@@ -150,25 +142,19 @@ export function useHostnames(currentIp: string) {
           });
         });
 
-        setTimeout(() => {
-          if (!isCancelled) {
-            setHostnames(list);
-            setLoading(false);
-            setIsCloudSynced(true);
-            setSyncError(null);
-          }
-        }, 0);
+        if (!isCancelled) {
+          setHostnames(list);
+          setLoading(false);
+          setIsCloudSynced(true);
+          setSyncError(null);
+        }
       },
       (err) => {
         if (isCancelled) return;
         console.warn('Firestore onSnapshot notice:', err.message);
-        setTimeout(() => {
-          if (!isCancelled) {
-            setSyncError(err.message);
-            setIsCloudSynced(false);
-            setLoading(false);
-          }
-        }, 0);
+        setSyncError(err.message);
+        setIsCloudSynced(false);
+        setLoading(false);
       }
     );
 
@@ -198,10 +184,15 @@ export function useHostnames(currentIp: string) {
           setSyncError(err.message);
         }
       } else {
-        localStorage.setItem('noip_hostnames', JSON.stringify([record, ...hostnames]));
+        setHostnames((currentList) => {
+          try {
+            localStorage.setItem('noip_hostnames', JSON.stringify(currentList));
+          } catch {}
+          return currentList;
+        });
       }
     },
-    [user, hostnames]
+    [user]
   );
 
   // Delete Hostname from Firestore
@@ -219,11 +210,15 @@ export function useHostnames(currentIp: string) {
           setSyncError(err.message);
         }
       } else {
-        const remaining = hostnames.filter((h) => h.id !== id);
-        localStorage.setItem('noip_hostnames', JSON.stringify(remaining));
+        setHostnames((currentList) => {
+          try {
+            localStorage.setItem('noip_hostnames', JSON.stringify(currentList));
+          } catch {}
+          return currentList;
+        });
       }
     },
-    [user, hostnames]
+    [user]
   );
 
   // Refresh Hostname target IP
@@ -309,9 +304,17 @@ export function useHostnames(currentIp: string) {
   const updateHostname = useCallback(
     async (id: string, updates: Partial<HostnameRecord>) => {
       const nowStr = 'Just now';
-      setHostnames((prev) =>
-        prev.map((h) => (h.id === id ? { ...h, ...updates, lastUpdated: nowStr } : h))
-      );
+      setHostnames((prev) => {
+        const next = prev.map((h) => (h.id === id ? { ...h, ...updates, lastUpdated: nowStr } : h));
+        if (!user) {
+          try {
+            localStorage.setItem('noip_hostnames', JSON.stringify(next));
+          } catch (e) {
+            console.warn('Could not persist updated hostname to localStorage:', e);
+          }
+        }
+        return next;
+      });
 
       if (user) {
         try {
@@ -324,18 +327,6 @@ export function useHostnames(currentIp: string) {
         } catch (err: any) {
           console.error('Error updating hostname record:', err);
         }
-      } else {
-        setHostnames((currentList) => {
-          const updated = currentList.map((h) =>
-            h.id === id ? { ...h, ...updates, lastUpdated: nowStr } : h
-          );
-          try {
-            localStorage.setItem('noip_hostnames', JSON.stringify(updated));
-          } catch (e) {
-            console.warn('Could not persist updated hostname to localStorage:', e);
-          }
-          return updated;
-        });
       }
     },
     [user]
